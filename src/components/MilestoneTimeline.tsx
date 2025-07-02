@@ -22,13 +22,13 @@ export const MilestoneTimeline = ({ projects }: MilestoneTimelineProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'on-track':
-        return 'border-green-500 bg-green-50';
+        return 'border-[#00ec97] bg-[#00ec97]/5';
       case 'at-risk':
-        return 'border-yellow-500 bg-yellow-50';
+        return 'border-[#ff7966] bg-[#ff7966]/5';
       case 'delayed':
-        return 'border-red-500 bg-red-50';
+        return 'border-[#ff7966] bg-[#ff7966]/10';
       default:
-        return 'border-gray-500 bg-gray-50';
+        return 'border-black/20 bg-black/5';
     }
   };
 
@@ -47,36 +47,36 @@ export const MilestoneTimeline = ({ projects }: MilestoneTimelineProps) => {
     <div className="space-y-4">
       <div className="relative">
         {/* Timeline line */}
-        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-black/10"></div>
         
         {sortedProjects.map((project, index) => (
           <div key={project.id} className="relative flex items-start space-x-4 pb-6">
             {/* Timeline dot */}
             <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 ${getStatusColor(project.status)} flex items-center justify-center z-10`}>
-              <div className="w-2 h-2 rounded-full bg-current opacity-60"></div>
+              <div className="w-2 h-2 rounded-full bg-current opacity-70"></div>
             </div>
             
             {/* Content */}
-            <Card className="flex-1 ml-2">
-              <CardContent className="p-4">
+            <Card className="flex-1 ml-2 bg-white border-black/10 shadow-sm">
+              <CardContent className="p-5">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <h4 className="font-medium">{project.name}</h4>
-                    <p className="text-sm text-muted-foreground">{project.nextMilestone}</p>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-black">{project.name}</h4>
+                    <p className="text-sm text-black/70 font-medium">{project.nextMilestone}</p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <Badge 
                       variant={isOverdue(project.dueDate) ? "destructive" : "outline"}
-                      className="text-xs"
+                      className={`text-xs font-medium ${!isOverdue(project.dueDate) ? 'border-[#17d9d4]/30 text-black bg-[#17d9d4]/5' : ''}`}
                     >
                       {formatDate(project.dueDate)}
                     </Badge>
                     <Badge 
                       variant="outline" 
-                      className={`text-xs ${
-                        project.status === 'on-track' ? 'border-green-500 text-green-700' :
-                        project.status === 'at-risk' ? 'border-yellow-500 text-yellow-700' :
-                        'border-red-500 text-red-700'
+                      className={`text-xs font-medium ${
+                        project.status === 'on-track' ? 'border-[#00ec97]/30 text-black bg-[#00ec97]/5' :
+                        project.status === 'at-risk' ? 'border-[#ff7966]/30 text-black bg-[#ff7966]/5' :
+                        'border-[#ff7966]/40 text-black bg-[#ff7966]/10'
                       }`}
                     >
                       {project.status.replace('-', ' ')}

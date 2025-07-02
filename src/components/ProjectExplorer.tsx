@@ -44,9 +44,9 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
   return (
     <div className="space-y-6">
       {/* Search and Filters */}
-      <Card>
+      <Card className="bg-white border-black/10 shadow-sm">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
             <Search className="h-5 w-5" />
             <span>Project Explorer</span>
           </CardTitle>
@@ -59,14 +59,14 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                 placeholder="Search projects, milestones, or teams..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                className="w-full border-black/20 focus:border-[#00ec97] font-medium"
               />
             </div>
             
             {/* Filters */}
             <div className="flex gap-4">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] border-black/20 font-medium">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -78,7 +78,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
               </Select>
               
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[140px] border-black/20 font-medium">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -96,6 +96,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}
                 >
                   Grid
                 </Button>
@@ -103,6 +104,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                   variant={viewMode === 'list' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}
                 >
                   List
                 </Button>
@@ -115,7 +117,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-black/60 font-medium">
             Showing {filteredProjects.length} of {projects.length} projects
           </p>
           {(searchTerm || statusFilter !== 'all' || categoryFilter !== 'all') && (
@@ -127,6 +129,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                 setStatusFilter('all');
                 setCategoryFilter('all');
               }}
+              className="font-medium hover:bg-black/5"
             >
               Clear filters
             </Button>
@@ -134,8 +137,8 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
         </div>
         
         <div className="flex items-center space-x-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
+          <Filter className="h-4 w-4 text-black/60" />
+          <span className="text-sm text-black/60 font-medium">
             Active filters: {[
               searchTerm && 'Search',
               statusFilter !== 'all' && 'Status',
@@ -157,12 +160,12 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
       </div>
 
       {filteredProjects.length === 0 && (
-        <Card>
+        <Card className="bg-white border-black/10 shadow-sm">
           <CardContent className="py-12 text-center">
-            <div className="text-muted-foreground">
+            <div className="text-black/60">
               <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">No projects found</h3>
-              <p>Try adjusting your search terms or filters</p>
+              <h3 className="text-lg font-semibold mb-2 text-black">No projects found</h3>
+              <p className="font-medium">Try adjusting your search terms or filters</p>
             </div>
           </CardContent>
         </Card>

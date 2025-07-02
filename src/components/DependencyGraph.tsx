@@ -18,39 +18,39 @@ export const DependencyGraph = ({ projects }: DependencyGraphProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'on-track':
-        return 'border-green-500 bg-green-50 text-green-700';
+        return 'border-[#00ec97] bg-[#00ec97]/5 text-black';
       case 'at-risk':
-        return 'border-yellow-500 bg-yellow-50 text-yellow-700';
+        return 'border-[#ff7966] bg-[#ff7966]/5 text-black';
       case 'delayed':
-        return 'border-red-500 bg-red-50 text-red-700';
+        return 'border-[#ff7966] bg-[#ff7966]/10 text-black';
       default:
-        return 'border-gray-500 bg-gray-50 text-gray-700';
+        return 'border-black/20 bg-black/5 text-black';
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-muted-foreground mb-4">
+      <div className="text-sm text-black/60 mb-6 font-medium">
         Visualization showing project dependencies and their current status
       </div>
       
       {projects.map((project) => (
-        <Card key={project.id} className="overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-4">
+        <Card key={project.id} className="overflow-hidden bg-white border-black/10 shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-6">
               {/* Project Node */}
-              <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg border-2 ${getStatusColor(project.status)}`}>
+              <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg border-2 ${getStatusColor(project.status)}`}>
                 <GitBranch className="h-4 w-4" />
-                <span className="font-medium">{project.name}</span>
+                <span className="font-semibold">{project.name}</span>
               </div>
               
               {/* Dependencies */}
               {project.dependencies.length > 0 && (
                 <>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  <ArrowRight className="h-5 w-5 text-black/40" />
                   <div className="flex flex-wrap gap-2">
                     {project.dependencies.map((dep, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
+                      <Badge key={index} variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-black bg-[#9797ff]/5">
                         {dep}
                       </Badge>
                     ))}
@@ -59,7 +59,7 @@ export const DependencyGraph = ({ projects }: DependencyGraphProps) => {
               )}
               
               {project.dependencies.length === 0 && (
-                <span className="text-sm text-muted-foreground italic">
+                <span className="text-sm text-black/50 italic font-medium">
                   No dependencies
                 </span>
               )}
@@ -68,12 +68,12 @@ export const DependencyGraph = ({ projects }: DependencyGraphProps) => {
         </Card>
       ))}
       
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <div className="w-5 h-5 rounded-full bg-blue-500 flex-shrink-0 mt-0.5"></div>
+      <div className="bg-[#17d9d4]/5 border border-[#17d9d4]/20 rounded-lg p-6">
+        <div className="flex items-start space-x-4">
+          <div className="w-5 h-5 rounded-full bg-[#17d9d4] flex-shrink-0 mt-0.5"></div>
           <div>
-            <h4 className="font-medium text-blue-900 mb-1">Enhanced Visualization Coming Soon</h4>
-            <p className="text-sm text-blue-700">
+            <h4 className="font-semibold text-black mb-2">Enhanced Visualization Coming Soon</h4>
+            <p className="text-sm text-black/70 font-medium">
               Interactive network graph with drag-and-drop nodes, critical path highlighting, 
               and real-time dependency impact analysis will be available in the next update.
             </p>

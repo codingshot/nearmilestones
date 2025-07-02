@@ -29,7 +29,7 @@ const Index = () => {
       id: 1,
       name: "Omnibridge",
       category: "Infrastructure",
-      status: "on-track",
+      status: "on-track" as const,
       progress: 85,
       nextMilestone: "Mainnet Beta",
       dueDate: "2024-08-15",
@@ -40,7 +40,7 @@ const Index = () => {
       id: 2,
       name: "Agent Hub SDK",
       category: "SDK",
-      status: "at-risk",
+      status: "at-risk" as const,
       progress: 62,
       nextMilestone: "API Documentation",
       dueDate: "2024-07-28",
@@ -51,7 +51,7 @@ const Index = () => {
       id: 3,
       name: "Meteor Wallet",
       category: "Grantee",
-      status: "delayed",
+      status: "delayed" as const,
       progress: 45,
       nextMilestone: "Security Audit",
       dueDate: "2024-07-20",
@@ -61,22 +61,22 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f2f1e9]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white border-b border-black/10 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">NEAR Ecosystem Tracker</h1>
-            <p className="text-gray-600">Milestone tracking and dependency management</p>
+            <h1 className="text-3xl font-semibold text-black mb-2">NEAR Ecosystem Tracker</h1>
+            <p className="text-black/70 font-medium">Milestone tracking and dependency management</p>
           </div>
           <div className="flex items-center space-x-4">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-[#00ec97]/10 text-black border-[#00ec97]/30 font-medium">
               {ecosystemStats.onTrackProjects} On Track
             </Badge>
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            <Badge variant="outline" className="bg-[#ff7966]/10 text-black border-[#ff7966]/30 font-medium">
               {ecosystemStats.atRiskProjects} At Risk
             </Badge>
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            <Badge variant="outline" className="bg-[#ff7966]/20 text-black border-[#ff7966]/40 font-medium">
               {ecosystemStats.delayedProjects} Delayed
             </Badge>
           </div>
@@ -85,69 +85,69 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[400px]">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4 lg:w-[500px] bg-white border border-black/10">
+            <TabsTrigger value="dashboard" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dashboard</TabsTrigger>
+            <TabsTrigger value="projects" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Projects</TabsTrigger>
+            <TabsTrigger value="dependencies" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dependencies</TabsTrigger>
+            <TabsTrigger value="analytics" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Analytics</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="dashboard" className="space-y-6">
+          <TabsContent value="dashboard" className="space-y-8">
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
-                  <GitBranch className="h-4 w-4 text-muted-foreground" />
+              <Card className="bg-white border-black/10 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="text-sm font-semibold text-black">Total Projects</CardTitle>
+                  <GitBranch className="h-5 w-5 text-black/60" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{ecosystemStats.totalProjects}</div>
-                  <p className="text-xs text-muted-foreground">Active ecosystem projects</p>
+                  <div className="text-3xl font-semibold text-black">{ecosystemStats.totalProjects}</div>
+                  <p className="text-sm text-black/60 font-medium mt-1">Active ecosystem projects</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Upcoming Milestones</CardTitle>
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              <Card className="bg-white border-black/10 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="text-sm font-semibold text-black">Upcoming Milestones</CardTitle>
+                  <CalendarDays className="h-5 w-5 text-black/60" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{ecosystemStats.upcomingMilestones}</div>
-                  <p className="text-xs text-muted-foreground">Due in next 30 days</p>
+                  <div className="text-3xl font-semibold text-black">{ecosystemStats.upcomingMilestones}</div>
+                  <p className="text-sm text-black/60 font-medium mt-1">Due in next 30 days</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">At Risk</CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <Card className="bg-white border-black/10 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="text-sm font-semibold text-black">At Risk</CardTitle>
+                  <AlertTriangle className="h-5 w-5 text-[#ff7966]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{ecosystemStats.atRiskProjects}</div>
-                  <p className="text-xs text-muted-foreground">Projects needing attention</p>
+                  <div className="text-3xl font-semibold text-[#ff7966]">{ecosystemStats.atRiskProjects}</div>
+                  <p className="text-sm text-black/60 font-medium mt-1">Projects needing attention</p>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-green-600" />
+              <Card className="bg-white border-black/10 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                  <CardTitle className="text-sm font-semibold text-black">Completion Rate</CardTitle>
+                  <TrendingUp className="h-5 w-5 text-[#00ec97]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">{ecosystemStats.completionRate}%</div>
-                  <Progress value={ecosystemStats.completionRate} className="mt-2" />
+                  <div className="text-3xl font-semibold text-[#00ec97]">{ecosystemStats.completionRate}%</div>
+                  <Progress value={ecosystemStats.completionRate} className="mt-3 h-2" />
                 </CardContent>
               </Card>
             </div>
 
             {/* Recent Projects */}
-            <Card>
+            <Card className="bg-white border-black/10 shadow-sm">
               <CardHeader>
-                <CardTitle>Recent Project Updates</CardTitle>
+                <CardTitle className="text-xl font-semibold text-black">Recent Project Updates</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {recentProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                   ))}
@@ -156,9 +156,9 @@ const Index = () => {
             </Card>
 
             {/* Timeline Overview */}
-            <Card>
+            <Card className="bg-white border-black/10 shadow-sm">
               <CardHeader>
-                <CardTitle>Milestone Timeline</CardTitle>
+                <CardTitle className="text-xl font-semibold text-black">Milestone Timeline</CardTitle>
               </CardHeader>
               <CardContent>
                 <MilestoneTimeline projects={recentProjects} />
@@ -171,9 +171,9 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="dependencies">
-            <Card>
+            <Card className="bg-white border-black/10 shadow-sm">
               <CardHeader>
-                <CardTitle>Ecosystem Dependencies</CardTitle>
+                <CardTitle className="text-xl font-semibold text-black">Ecosystem Dependencies</CardTitle>
               </CardHeader>
               <CardContent>
                 <DependencyGraph projects={recentProjects} />
@@ -183,23 +183,23 @@ const Index = () => {
 
           <TabsContent value="analytics">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white border-black/10 shadow-sm">
                 <CardHeader>
-                  <CardTitle>Project Status Distribution</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-black">Project Status Distribution</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="h-64 flex items-center justify-center text-black/60 font-medium">
                     Analytics charts will be implemented here
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-white border-black/10 shadow-sm">
                 <CardHeader>
-                  <CardTitle>Milestone Completion Trends</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-black">Milestone Completion Trends</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
+                  <div className="h-64 flex items-center justify-center text-black/60 font-medium">
                     Trend analysis charts will be implemented here
                   </div>
                 </CardContent>

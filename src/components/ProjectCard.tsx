@@ -25,13 +25,13 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'on-track':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-[#00ec97]/10 text-black border-[#00ec97]/30';
       case 'at-risk':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-[#ff7966]/10 text-black border-[#ff7966]/30';
       case 'delayed':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-[#ff7966]/20 text-black border-[#ff7966]/40';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-black/5 text-black border-black/20';
     }
   };
 
@@ -44,59 +44,59 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="pb-3">
+    <Card className="bg-white border-black/10 shadow-sm hover:shadow-md transition-all duration-200 hover:border-[#00ec97]/30">
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <h3 className="font-semibold text-lg">{project.name}</h3>
-            <Badge variant="outline" className="text-xs">
+          <div className="space-y-2">
+            <h3 className="font-semibold text-lg text-black">{project.name}</h3>
+            <Badge variant="outline" className="text-xs font-medium border-black/20 text-black">
               {project.category}
             </Badge>
           </div>
-          <Badge className={getStatusColor(project.status)}>
+          <Badge className={`font-medium ${getStatusColor(project.status)}`}>
             {project.status.replace('-', ' ')}
           </Badge>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {/* Progress */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">Progress</span>
-            <span className="text-sm text-muted-foreground">{project.progress}%</span>
+            <span className="text-sm font-semibold text-black">Progress</span>
+            <span className="text-sm text-black/70 font-medium">{project.progress}%</span>
           </div>
           <Progress value={project.progress} className="h-2" />
         </div>
 
         {/* Next Milestone */}
-        <div className="flex items-center space-x-2 text-sm">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">Next:</span>
-          <span>{project.nextMilestone}</span>
-          <Badge variant="outline" className="text-xs">
+        <div className="flex items-center space-x-3 text-sm">
+          <Calendar className="h-4 w-4 text-black/60" />
+          <span className="font-semibold text-black">Next:</span>
+          <span className="text-black/80">{project.nextMilestone}</span>
+          <Badge variant="outline" className="text-xs font-medium border-[#17d9d4]/30 text-black bg-[#17d9d4]/5">
             {formatDate(project.dueDate)}
           </Badge>
         </div>
 
         {/* Team */}
-        <div className="flex items-center space-x-2 text-sm">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">Team:</span>
-          <span className="text-muted-foreground">
+        <div className="flex items-center space-x-3 text-sm">
+          <Users className="h-4 w-4 text-black/60" />
+          <span className="font-semibold text-black">Team:</span>
+          <span className="text-black/70 font-medium">
             {project.team.join(', ')}
           </span>
         </div>
 
         {/* Dependencies */}
         {project.dependencies.length > 0 && (
-          <div className="flex items-start space-x-2 text-sm">
-            <GitBranch className="h-4 w-4 text-muted-foreground mt-0.5" />
+          <div className="flex items-start space-x-3 text-sm">
+            <GitBranch className="h-4 w-4 text-black/60 mt-0.5" />
             <div>
-              <span className="font-medium">Dependencies:</span>
-              <div className="mt-1 space-x-1">
+              <span className="font-semibold text-black">Dependencies:</span>
+              <div className="mt-2 space-x-2">
                 {project.dependencies.map((dep, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
+                  <Badge key={index} variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-black bg-[#9797ff]/5">
                     {dep}
                   </Badge>
                 ))}
@@ -105,8 +105,8 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
           </div>
         )}
 
-        <div className="flex justify-end pt-2">
-          <Button variant="outline" size="sm">
+        <div className="flex justify-end pt-3">
+          <Button variant="outline" size="sm" className="font-medium border-black/20 hover:border-[#00ec97] hover:bg-[#00ec97]/5">
             View Details
           </Button>
         </div>
