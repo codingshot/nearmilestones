@@ -1,0 +1,235 @@
+
+{
+  "projects": [
+    {
+      "id": "omnibridge",
+      "name": "Omnibridge",
+      "category": "Infrastructure",
+      "status": "on-track",
+      "progress": 85,
+      "nextMilestone": "Mainnet Beta",
+      "dueDate": "2024-08-15",
+      "team": ["Alice Chen", "Bob Rodriguez"],
+      "dependencies": [],
+      "description": "Cross-chain bridge infrastructure",
+      "githubRepo": "https://github.com/omnibridge/omnibridge",
+      "website": "https://omnibridge.near.org",
+      "docs": "https://docs.omnibridge.near.org",
+      "twitter": "https://twitter.com/omnibridge",
+      "discord": "https://discord.gg/omnibridge",
+      "fundingType": "infrastructure",
+      "lastUpdated": "2024-07-02T10:00:00Z",
+      "milestones": [
+        {
+          "id": "omnibridge-m1",
+          "title": "Technical Architecture",
+          "status": "completed",
+          "dueDate": "2024-02-01",
+          "progress": 100,
+          "description": "Complete technical architecture design and documentation",
+          "definitionOfDone": "Architecture document approved, technical specs reviewed by security team, and implementation plan finalized",
+          "isGrantMilestone": true,
+          "dependencies": [],
+          "links": {
+            "github": "https://github.com/omnibridge/omnibridge/milestone/1",
+            "docs": "https://docs.omnibridge.near.org/architecture"
+          }
+        },
+        {
+          "id": "omnibridge-m2",
+          "title": "Smart Contract Development",
+          "status": "completed",
+          "dueDate": "2024-04-15",
+          "progress": 100,
+          "description": "Develop and test core smart contracts for cross-chain bridge functionality",
+          "definitionOfDone": "All smart contracts deployed on testnet, unit tests passing with 95% coverage, and integration tests completed",
+          "isGrantMilestone": true,
+          "dependencies": ["omnibridge-m1"],
+          "links": {
+            "github": "https://github.com/omnibridge/omnibridge/milestone/2",
+            "testnet": "https://testnet.omnibridge.near.org"
+          }
+        },
+        {
+          "id": "omnibridge-m3",
+          "title": "Security Audit",
+          "status": "completed",
+          "dueDate": "2024-06-01",
+          "progress": 100,
+          "description": "Third-party security audit of smart contracts and infrastructure",
+          "definitionOfDone": "Security audit completed with no critical issues, all medium/high issues resolved, and audit report published",
+          "isGrantMilestone": true,
+          "dependencies": ["omnibridge-m2"],
+          "links": {
+            "auditReport": "https://omnibridge.near.org/audit-report.pdf"
+          }
+        },
+        {
+          "id": "omnibridge-m4",
+          "title": "Testnet Launch",
+          "status": "completed",
+          "dueDate": "2024-07-01",
+          "progress": 100,
+          "description": "Deploy bridge on testnet and conduct comprehensive testing",
+          "definitionOfDone": "Testnet deployment successful, user testing completed, and performance benchmarks met",
+          "isGrantMilestone": false,
+          "dependencies": ["omnibridge-m3"],
+          "links": {
+            "testnet": "https://testnet.omnibridge.near.org",
+            "docs": "https://docs.omnibridge.near.org/testnet"
+          }
+        },
+        {
+          "id": "omnibridge-m5",
+          "title": "Mainnet Beta",
+          "status": "in-progress",
+          "dueDate": "2024-08-15",
+          "progress": 75,
+          "description": "Launch beta version on mainnet with limited functionality",
+          "definitionOfDone": "Beta launched with basic bridge functionality, monitoring systems active, and user onboarding process established",
+          "isGrantMilestone": true,
+          "dependencies": ["omnibridge-m4"],
+          "links": {
+            "github": "https://github.com/omnibridge/omnibridge/milestone/5"
+          }
+        },
+        {
+          "id": "omnibridge-m6",
+          "title": "Full Mainnet Launch",
+          "status": "pending",
+          "dueDate": "2024-09-30",
+          "progress": 0,
+          "description": "Full mainnet launch with all features and full liquidity support",
+          "definitionOfDone": "Full mainnet deployment, all features active, liquidity providers onboarded, and 24/7 monitoring established",
+          "isGrantMilestone": true,
+          "dependencies": ["omnibridge-m5"],
+          "links": {}
+        }
+      ]
+    },
+    {
+      "id": "agent-hub-sdk",
+      "name": "Agent Hub SDK",
+      "category": "SDK",
+      "status": "at-risk",
+      "progress": 62,
+      "nextMilestone": "API Documentation",
+      "dueDate": "2024-07-28",
+      "team": ["Carol Kim", "David Park"],
+      "dependencies": [],
+      "description": "SDK for building AI agents on NEAR",
+      "githubRepo": "https://github.com/agenthub/sdk",
+      "website": "https://agenthub.near.org",
+      "docs": "https://docs.agenthub.near.org",
+      "fundingType": "sdk",
+      "lastUpdated": "2024-07-01T15:30:00Z",
+      "milestones": [
+        {
+          "id": "agent-hub-m1",
+          "title": "Core SDK Framework",
+          "status": "completed",
+          "dueDate": "2024-04-15",
+          "progress": 100,
+          "description": "Build foundational SDK framework and core libraries",
+          "definitionOfDone": "SDK framework completed, core APIs implemented, and developer documentation drafted",
+          "isGrantMilestone": true,
+          "dependencies": [],
+          "links": {
+            "github": "https://github.com/agenthub/sdk/milestone/1",
+            "docs": "https://docs.agenthub.near.org/core"
+          }
+        },
+        {
+          "id": "agent-hub-m2",
+          "title": "Agent Templates",
+          "status": "completed",
+          "dueDate": "2024-05-30",
+          "progress": 100,
+          "description": "Create reusable agent templates for common use cases",
+          "definitionOfDone": "5 agent templates created, tested, and documented with example implementations",
+          "isGrantMilestone": false,
+          "dependencies": ["agent-hub-m1"],
+          "links": {
+            "github": "https://github.com/agenthub/sdk/tree/main/templates",
+            "examples": "https://examples.agenthub.near.org"
+          }
+        },
+        {
+          "id": "agent-hub-m3",
+          "title": "API Documentation",
+          "status": "in-progress",
+          "dueDate": "2024-07-28",
+          "progress": 60,
+          "description": "Complete comprehensive API documentation and developer guides",
+          "definitionOfDone": "Complete API reference, developer guides, tutorials, and interactive examples published",
+          "isGrantMilestone": true,
+          "dependencies": ["agent-hub-m1", "agent-hub-m2"],
+          "links": {
+            "github": "https://github.com/agenthub/sdk/milestone/3",
+            "docs": "https://docs.agenthub.near.org"
+          }
+        },
+        {
+          "id": "agent-hub-m4",
+          "title": "Example Applications",
+          "status": "pending",
+          "dueDate": "2024-08-30",
+          "progress": 10,
+          "description": "Build example applications demonstrating SDK capabilities",
+          "definitionOfDone": "3 example applications built, deployed, and documented with source code available",
+          "isGrantMilestone": true,
+          "dependencies": ["agent-hub-m3"],
+          "links": {}
+        }
+      ]
+    },
+    {
+      "id": "meteor-wallet",
+      "name": "Meteor Wallet",
+      "category": "Grantee",
+      "status": "delayed",
+      "progress": 45,
+      "nextMilestone": "Security Audit",
+      "dueDate": "2024-07-20",
+      "team": ["Eve Thompson", "Frank Liu"],
+      "dependencies": [],
+      "description": "Next-generation NEAR wallet",
+      "githubRepo": "https://github.com/meteor/wallet",
+      "website": "https://meteor.near.org",
+      "fundingType": "grant",
+      "lastUpdated": "2024-06-30T09:15:00Z",
+      "milestones": [
+        {
+          "id": "meteor-m1",
+          "title": "Core Wallet Features",
+          "status": "completed",
+          "dueDate": "2024-05-15",
+          "progress": 100,
+          "description": "Implement basic wallet functionality",
+          "definitionOfDone": "Wallet creation, transaction signing, and account management features completed",
+          "isGrantMilestone": true,
+          "dependencies": [],
+          "links": {
+            "github": "https://github.com/meteor/wallet/milestone/1"
+          }
+        },
+        {
+          "id": "meteor-m2",
+          "title": "Security Audit",
+          "status": "delayed",
+          "dueDate": "2024-07-20",
+          "progress": 30,
+          "description": "Comprehensive security audit and vulnerability assessment",
+          "definitionOfDone": "Security audit completed, all critical vulnerabilities addressed, and security report published",
+          "isGrantMilestone": true,
+          "dependencies": ["meteor-m1", "omnibridge-m3"],
+          "links": {
+            "github": "https://github.com/meteor/wallet/milestone/2"
+          }
+        }
+      ]
+    }
+  ],
+  "lastUpdate": "2024-07-02T10:00:00Z",
+  "version": "1.0.0"
+}
