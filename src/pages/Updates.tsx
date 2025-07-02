@@ -96,8 +96,8 @@ const Updates = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="text-4xl">🔌</div>
-            <h1 className="text-4xl font-bold text-black">WEB3PLUG Updates</h1>
+            <div className="text-4xl">🚀</div>
+            <h1 className="text-4xl font-bold text-black">NEAR Ecosystem Product Updates</h1>
           </div>
           <p className="text-xl text-black/60 font-medium max-w-2xl mx-auto">
             Stay up to date with the latest changes, milestone completions, and project updates in the NEAR ecosystem
@@ -220,7 +220,7 @@ const Updates = () => {
           ) : (
             <Card className="bg-white border-black/10 shadow-sm">
               <CardContent className="p-12 text-center">
-                <div className="text-6xl mb-4">🔌</div>
+                <div className="text-6xl mb-4">🚀</div>
                 <h3 className="text-xl font-semibold text-black mb-2">No Updates Yet</h3>
                 <p className="text-black/60 font-medium">
                   Check back later for the latest updates and changes to NEAR ecosystem projects.
