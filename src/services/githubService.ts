@@ -1,4 +1,3 @@
-
 const GITHUB_REPO_OWNER = 'codingshot';
 const GITHUB_REPO_NAME = 'nearmilestones';
 const GITHUB_DATA_PATH = 'public/data/projects.json';
@@ -95,11 +94,28 @@ export class GitHubService {
   }
 
   generatePRUrl(projectData: any): string {
-    const branchName = `update-${projectData.id}-${Date.now()}`;
-    const title = `Update ${projectData.name} milestone data`;
-    const body = `## Project Update\n\n**Project:** ${projectData.name}\n**Status:** ${projectData.status}\n**Next Milestone:** ${projectData.nextMilestone}\n**Due Date:** ${projectData.dueDate}\n\n### Changes Made:\n- Updated milestone information\n- Modified project status\n\n### Verification:\n- [ ] Data format is correct\n- [ ] All required fields are present\n- [ ] Dates are in ISO format`;
+    if (projectData.action === 'mark-complete') {
+      const baseUrl = 'https://github.com/near/ecosystem-directory/compare/main...';
+      const branch = `milestone-complete-${projectData.projectId}-${projectData.milestoneId}`;
+      const title = encodeURIComponent(`Mark milestone ${projectData.milestoneId} as complete for ${projectData.projectId}`);
+      const body = encodeURIComponent(`This PR marks milestone ${projectData.milestoneId} as completed for project ${projectData.projectId}.
+
+**Changes:**
+- Updated milestone status to 'completed'
+- Set progress to 100%
+- Updated completion date
+
+Please review and merge if the milestone completion criteria have been met.`);
+      
+      return `${baseUrl}${branch}?quick_pull=1&title=${title}&body=${body}`;
+    }
+
+    const baseUrl = 'https://github.com/near/ecosystem-directory/compare/main...';
+    const branch = `update-${projectData.id || 'project'}-${Date.now()}`;
+    const title = encodeURIComponent(`Update project: ${projectData.name || projectData.id}`);
+    const body = encodeURIComponent(`Automated update for project ${projectData.name || projectData.id}`);
     
-    return `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/compare/main...${branchName}?quick_pull=1&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+    return `${baseUrl}${branch}?quick_pull=1&title=${title}&body=${body}`;
   }
 
   generateIssueUrl(projectId: string, milestoneData: any): string {
