@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,10 +17,12 @@ import { Footer } from '@/components/Footer';
 import { ProjectStatusChart } from '@/components/ProjectStatusChart';
 import { MilestoneProgressChart } from '@/components/MilestoneProgressChart';
 import { AnalyticsOverview } from '@/components/AnalyticsOverview';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { projects: githubProjects, loading, error } = useGitHubData();
+  const isMobile = useIsMobile();
 
   // Use GitHub data if available, otherwise fallback to mock data
   const recentProjects = githubProjects.length > 0 ? githubProjects : [
@@ -73,42 +74,65 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-[#f2f1e9]">
       {/* Header */}
-      <header className="bg-white border-b border-black/10 px-6 py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold text-black mb-2">NEAR Milestones</h1>
-            <p className="text-black/70 font-medium">
-              Milestone tracking and dependency management
-              {loading && <span className="ml-2 text-[#17d9d4]">(Loading GitHub data...)</span>}
-              {error && <span className="ml-2 text-[#ff7966]">(Using cached data)</span>}
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="outline" className="bg-[#00ec97]/10 text-black border-[#00ec97]/30 font-medium">
-              {ecosystemStats.onTrackProjects} On Track
-            </Badge>
-            <Badge variant="outline" className="bg-[#ff7966]/10 text-black border-[#ff7966]/30 font-medium">
-              {ecosystemStats.atRiskProjects} At Risk
-            </Badge>
-            <Badge variant="outline" className="bg-[#ff7966]/20 text-black border-[#ff7966]/40 font-medium">
-              {ecosystemStats.delayedProjects} Delayed
-            </Badge>
+      <header className="bg-white border-b border-black/10 px-4 sm:px-6 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+            <div className="text-center lg:text-left">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-black mb-2">NEAR Milestones</h1>
+              <p className="text-sm sm:text-base text-black/70 font-medium">
+                Milestone tracking and dependency management
+                {loading && <span className="ml-2 text-[#17d9d4]">(Loading GitHub data...)</span>}
+                {error && <span className="ml-2 text-[#ff7966]">(Using cached data)</span>}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2 sm:gap-4">
+              <Badge variant="outline" className="bg-[#00ec97]/10 text-black border-[#00ec97]/30 font-medium text-xs sm:text-sm">
+                {ecosystemStats.onTrackProjects} On Track
+              </Badge>
+              <Badge variant="outline" className="bg-[#ff7966]/10 text-black border-[#ff7966]/30 font-medium text-xs sm:text-sm">
+                {ecosystemStats.atRiskProjects} At Risk
+              </Badge>
+              <Badge variant="outline" className="bg-[#ff7966]/20 text-black border-[#ff7966]/40 font-medium text-xs sm:text-sm">
+                {ecosystemStats.delayedProjects} Delayed
+              </Badge>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-7 lg:w-[800px] bg-white border border-black/10">
-            <TabsTrigger value="dashboard" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dashboard</TabsTrigger>
-            <TabsTrigger value="projects" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Projects</TabsTrigger>
-            <TabsTrigger value="calendar" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Calendar</TabsTrigger>
-            <TabsTrigger value="delays" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Delays</TabsTrigger>
-            <TabsTrigger value="dependencies" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dependencies</TabsTrigger>
-            <TabsTrigger value="github" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">GitHub</TabsTrigger>
-            <TabsTrigger value="analytics" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Analytics</TabsTrigger>
-          </TabsList>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 sm:space-y-8">
+          <div className="w-full overflow-x-auto">
+            <TabsList className={`
+              ${isMobile 
+                ? 'flex w-full min-w-max bg-white border border-black/10' 
+                : 'grid w-full grid-cols-7 lg:w-[800px] bg-white border border-black/10'
+              }
+            `}>
+              <TabsTrigger value="dashboard" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="projects" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                Projects
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                Calendar
+              </TabsTrigger>
+              <TabsTrigger value="delays" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                Delays
+              </TabsTrigger>
+              <TabsTrigger value="dependencies" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                Dependencies
+              </TabsTrigger>
+              <TabsTrigger value="github" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                GitHub
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black whitespace-nowrap px-3 sm:px-4">
+                Analytics
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="dashboard" className="space-y-8">
             {/* Stats Overview */}
