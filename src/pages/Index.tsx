@@ -13,7 +13,6 @@ import { GitHubIntegration } from '@/components/GitHubIntegration';
 import { CalendarView } from '@/components/CalendarView';
 import { DelaysView } from '@/components/DelaysView';
 import { useGitHubData } from '@/hooks/useGitHubData';
-import { Footer } from '@/components/Footer';
 import { ProjectStatusChart } from '@/components/ProjectStatusChart';
 import { MilestoneProgressChart } from '@/components/MilestoneProgressChart';
 import { AnalyticsOverview } from '@/components/AnalyticsOverview';
@@ -72,7 +71,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f2f1e9]">
+    <div className="bg-[#f2f1e9]">
       {/* Header */}
       <header className="bg-white border-b border-black/10 px-4 sm:px-6 py-4 sm:py-6">
         <div className="max-w-7xl mx-auto">
@@ -245,9 +244,6 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };
