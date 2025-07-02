@@ -1,4 +1,3 @@
-
 import { GitHubService } from './githubService';
 
 export interface ChangelogEntry {
@@ -201,9 +200,18 @@ export class ChangelogService {
         changes.push({
           type: 'project_added',
           title: `${currentProject.name} Added`,
-          description: `New project "${currentProject.name}" has been added to the ecosystem`,
+          description: `New project "${currentProject.name}" (${currentProject.category}) has been added to the ecosystem with ${currentProject.milestones?.length || 0} milestones and ${currentProject.progress}% overall progress`,
           projectId: currentProject.id,
-          details: { commitHash: commit.sha.substring(0, 7) }
+          details: { 
+            commitHash: commit.sha.substring(0, 7),
+            projectData: {
+              category: currentProject.category,
+              status: currentProject.status,
+              progress: currentProject.progress,
+              team: currentProject.team,
+              milestoneCount: currentProject.milestones?.length || 0
+            }
+          }
         });
       }
     });
@@ -216,9 +224,16 @@ export class ChangelogService {
         changes.push({
           type: 'removed',
           title: `${previousProject.name} Removed`,
-          description: `Project "${previousProject.name}" has been removed from the ecosystem`,
+          description: `Project "${previousProject.name}" (${previousProject.category}) has been removed from the ecosystem`,
           projectId: previousProject.id,
-          details: { commitHash: commit.sha.substring(0, 7) }
+          details: { 
+            commitHash: commit.sha.substring(0, 7),
+            removedProjectData: {
+              category: previousProject.category,
+              status: previousProject.status,
+              progress: previousProject.progress
+            }
+          }
         });
       }
     });
@@ -234,21 +249,96 @@ export class ChangelogService {
           changes.push({
             type: 'updated',
             title: `${currentProject.name} Status Changed`,
-            description: `Project status changed from ${previousProject.status} to ${currentProject.status}`,
+            description: `Project status updated from "${previousProject.status}" to "${currentProject.status}"`,
             projectId: currentProject.id,
-            details: { commitHash: commit.sha.substring(0, 7) }
+            details: { 
+              commitHash: commit.sha.substring(0, 7),
+              changeType: 'status',
+              oldValue: previousProject.status,
+              newValue: currentProject.status
+            }
           });
         }
 
         // Check for progress changes
         if (previousProject.progress !== currentProject.progress) {
           console.log(`Project progress changed for ${currentProject.name}: ${previousProject.progress}% -> ${currentProject.progress}%`);
+          const progressDiff = currentProject.progress - previousProject.progress;
           changes.push({
             type: 'updated',
             title: `${currentProject.name} Progress Updated`,
-            description: `Overall progress updated from ${previousProject.progress}% to ${currentProject.progress}%`,
+            description: `Overall progress ${progressDiff > 0 ? 'increased' : 'decreased'} from ${previousProject.progress}% to ${currentProject.progress}% (${progressDiff > 0 ? '+' : ''}${progressDiff}%)`,
             projectId: currentProject.id,
-            details: { commitHash: commit.sha.substring(0, 7) }
+            details: { 
+              commitHash: commit.sha.substring(0, 7),
+              changeType: 'progress',
+              oldValue: previousProject.progress,
+              newValue: currentProject.progress,
+              difference: progressDiff
+            }
+          });
+        }
+
+        // Check for next milestone changes
+        if (previousProject.nextMilestone !== currentProject.nextMilestone) {
+          changes.push({
+            type: 'updated',
+            title: `${currentProject.name} Next Milestone Updated`,
+            description: `Next milestone changed from "${previousProject.nextMilestone}" to "${currentProject.nextMilestone}"`,
+            projectId: currentProject.id,
+            details: { 
+              commitHash: commit.sha.substring(0, 7),
+              changeType: 'nextMilestone',
+              oldValue: previousProject.nextMilestone,
+              newValue: currentProject.nextMilestone
+            }
+          });
+        }
+
+        // Check for due date changes
+        if (previousProject.dueDate !== currentProject.dueDate) {
+          changes.push({
+            type: 'updated',
+            title: `${currentProject.name} Due Date Updated`,
+            description: `Project due date changed from ${previousProject.dueDate} to ${currentProject.dueDate}`,
+            projectId: currentProject.id,
+            details: { 
+              commitHash: commit.sha.substring(0, 7),
+              changeType: 'dueDate',
+              oldValue: previousProject.dueDate,
+              newValue: currentProject.dueDate
+            }
+          });
+        }
+
+        // Check for team changes
+        const prevTeam = previousProject.team || [];
+        const currTeam = currentProject.team || [];
+        if (JSON.stringify(prevTeam.sort()) !== JSON.stringify(currTeam.sort())) {
+          const addedMembers = currTeam.filter((member: string) => !prevTeam.includes(member));
+          const removedMembers = prevTeam.filter((member: string) => !currTeam.includes(member));
+          
+          let teamChangeDesc = 'Team composition updated';
+          if (addedMembers.length > 0) {
+            teamChangeDesc += ` (Added: ${addedMembers.join(', ')})`;
+          }
+          if (removedMembers.length > 0) {
+            teamChangeDesc += ` (Removed: ${removedMembers.join(', ')})`;
+          }
+
+          changes.push({
+            type: 'updated',
+            title: `${currentProject.name} Team Updated`,
+            description: teamChangeDesc,
+            projectId: currentProject.id,
+            details: { 
+              commitHash: commit.sha.substring(0, 7),
+              changeType: 'team',
+              oldTeam: prevTeam,
+              newTeam: currTeam,
+              addedMembers,
+              removedMembers
+            }
           });
         }
 
@@ -265,10 +355,20 @@ export class ChangelogService {
             changes.push({
               type: 'added',
               title: `${currentMilestone.title} Added`,
-              description: `New milestone "${currentMilestone.title}" added to ${currentProject.name}`,
+              description: `New milestone "${currentMilestone.title}" added to ${currentProject.name} (Due: ${currentMilestone.dueDate}, Status: ${currentMilestone.status})`,
               projectId: currentProject.id,
               milestoneId: currentMilestone.id,
-              details: { commitHash: commit.sha.substring(0, 7) }
+              details: { 
+                commitHash: commit.sha.substring(0, 7),
+                changeType: 'milestoneAdded',
+                milestoneData: {
+                  title: currentMilestone.title,
+                  status: currentMilestone.status,
+                  dueDate: currentMilestone.dueDate,
+                  progress: currentMilestone.progress,
+                  isGrantMilestone: currentMilestone.isGrantMilestone
+                }
+              }
             });
           } else {
             // Check for milestone status changes
@@ -278,28 +378,45 @@ export class ChangelogService {
                 changes.push({
                   type: 'milestone_completed',
                   title: `${currentMilestone.title} Completed`,
-                  description: `Milestone "${currentMilestone.title}" for ${currentProject.name} has been completed`,
+                  description: `Milestone "${currentMilestone.title}" for ${currentProject.name} has been completed (Progress: ${currentMilestone.progress}%)${currentMilestone.isGrantMilestone ? ' [Grant Milestone]' : ''}`,
                   projectId: currentProject.id,
                   milestoneId: currentMilestone.id,
-                  details: { commitHash: commit.sha.substring(0, 7) }
+                  details: { 
+                    commitHash: commit.sha.substring(0, 7),
+                    changeType: 'milestoneCompleted',
+                    previousStatus: previousMilestone.status,
+                    isGrantMilestone: currentMilestone.isGrantMilestone,
+                    completionProgress: currentMilestone.progress
+                  }
                 });
               } else if (currentMilestone.status === 'delayed') {
                 changes.push({
                   type: 'milestone_delayed',
                   title: `${currentMilestone.title} Delayed`,
-                  description: `Milestone "${currentMilestone.title}" for ${currentProject.name} has been delayed`,
+                  description: `Milestone "${currentMilestone.title}" for ${currentProject.name} has been delayed (Previous Status: ${previousMilestone.status})${currentMilestone.isGrantMilestone ? ' [Grant Milestone]' : ''}`,
                   projectId: currentProject.id,
                   milestoneId: currentMilestone.id,
-                  details: { commitHash: commit.sha.substring(0, 7) }
+                  details: { 
+                    commitHash: commit.sha.substring(0, 7),
+                    changeType: 'milestoneDelayed',
+                    previousStatus: previousMilestone.status,
+                    isGrantMilestone: currentMilestone.isGrantMilestone
+                  }
                 });
               } else {
                 changes.push({
                   type: 'updated',
                   title: `${currentMilestone.title} Status Updated`,
-                  description: `Milestone status changed from ${previousMilestone.status} to ${currentMilestone.status}`,
+                  description: `Milestone status changed from "${previousMilestone.status}" to "${currentMilestone.status}"${currentMilestone.isGrantMilestone ? ' [Grant Milestone]' : ''}`,
                   projectId: currentProject.id,
                   milestoneId: currentMilestone.id,
-                  details: { commitHash: commit.sha.substring(0, 7) }
+                  details: { 
+                    commitHash: commit.sha.substring(0, 7),
+                    changeType: 'milestoneStatus',
+                    oldValue: previousMilestone.status,
+                    newValue: currentMilestone.status,
+                    isGrantMilestone: currentMilestone.isGrantMilestone
+                  }
                 });
               }
             }
@@ -307,13 +424,39 @@ export class ChangelogService {
             // Check for milestone progress changes
             if (previousMilestone.progress !== currentMilestone.progress) {
               console.log(`Milestone progress changed: ${currentMilestone.title} from ${previousMilestone.progress}% to ${currentMilestone.progress}%`);
+              const progressDiff = currentMilestone.progress - previousMilestone.progress;
               changes.push({
                 type: 'updated',
                 title: `${currentMilestone.title} Progress Updated`,
-                description: `Progress updated from ${previousMilestone.progress}% to ${currentMilestone.progress}%`,
+                description: `Milestone progress ${progressDiff > 0 ? 'increased' : 'decreased'} from ${previousMilestone.progress}% to ${currentMilestone.progress}% (${progressDiff > 0 ? '+' : ''}${progressDiff}%)${currentMilestone.isGrantMilestone ? ' [Grant Milestone]' : ''}`,
                 projectId: currentProject.id,
                 milestoneId: currentMilestone.id,
-                details: { commitHash: commit.sha.substring(0, 7) }
+                details: { 
+                  commitHash: commit.sha.substring(0, 7),
+                  changeType: 'milestoneProgress',
+                  oldValue: previousMilestone.progress,
+                  newValue: currentMilestone.progress,
+                  difference: progressDiff,
+                  isGrantMilestone: currentMilestone.isGrantMilestone
+                }
+              });
+            }
+
+            // Check for milestone due date changes
+            if (previousMilestone.dueDate !== currentMilestone.dueDate) {
+              changes.push({
+                type: 'updated',
+                title: `${currentMilestone.title} Due Date Updated`,
+                description: `Milestone due date changed from ${previousMilestone.dueDate} to ${currentMilestone.dueDate}${currentMilestone.isGrantMilestone ? ' [Grant Milestone]' : ''}`,
+                projectId: currentProject.id,
+                milestoneId: currentMilestone.id,
+                details: { 
+                  commitHash: commit.sha.substring(0, 7),
+                  changeType: 'milestoneDueDate',
+                  oldValue: previousMilestone.dueDate,
+                  newValue: currentMilestone.dueDate,
+                  isGrantMilestone: currentMilestone.isGrantMilestone
+                }
               });
             }
           }
@@ -327,10 +470,19 @@ export class ChangelogService {
             changes.push({
               type: 'removed',
               title: `${previousMilestone.title} Removed`,
-              description: `Milestone "${previousMilestone.title}" removed from ${currentProject.name}`,
+              description: `Milestone "${previousMilestone.title}" removed from ${currentProject.name}${previousMilestone.isGrantMilestone ? ' [Was Grant Milestone]' : ''}`,
               projectId: currentProject.id,
               milestoneId: previousMilestone.id,
-              details: { commitHash: commit.sha.substring(0, 7) }
+              details: { 
+                commitHash: commit.sha.substring(0, 7),
+                changeType: 'milestoneRemoved',
+                removedMilestoneData: {
+                  title: previousMilestone.title,
+                  status: previousMilestone.status,
+                  progress: previousMilestone.progress,
+                  isGrantMilestone: previousMilestone.isGrantMilestone
+                }
+              }
             });
           }
         });
