@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -132,9 +131,9 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {/* Search Input */}
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-3">
             <div className="flex-1">
               <Input
                 placeholder="Search projects, milestones, team members, or dependencies..."
@@ -145,10 +144,10 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             </div>
           </div>
           
-          {/* Filters Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Filters Row 1 - More compact */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="border-black/20 font-medium">
+              <SelectTrigger className="border-black/20 font-medium text-xs h-8">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -160,7 +159,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             </Select>
             
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="border-black/20 font-medium">
+              <SelectTrigger className="border-black/20 font-medium text-xs h-8">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -174,8 +173,8 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             </Select>
 
             <Select value={fundingFilter} onValueChange={setFundingFilter}>
-              <SelectTrigger className="border-black/20 font-medium">
-                <SelectValue placeholder="Funding Type" />
+              <SelectTrigger className="border-black/20 font-medium text-xs h-8">
+                <SelectValue placeholder="Funding" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Funding</SelectItem>
@@ -186,7 +185,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             </Select>
 
             <Select value={progressFilter} onValueChange={setProgressFilter}>
-              <SelectTrigger className="border-black/20 font-medium">
+              <SelectTrigger className="border-black/20 font-medium text-xs h-8">
                 <SelectValue placeholder="Progress" />
               </SelectTrigger>
               <SelectContent>
@@ -198,7 +197,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             </Select>
 
             <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="border-black/20 font-medium">
+              <SelectTrigger className="border-black/20 font-medium text-xs h-8">
                 <SelectValue placeholder="Due Date" />
               </SelectTrigger>
               <SelectContent>
@@ -208,19 +207,19 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                 <SelectItem value="nextMonth">Next Month</SelectItem>
               </SelectContent>
             </Select>
-          </div>
 
-          {/* Filters Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Input
-              placeholder="Filter by team member..."
+              placeholder="Team member..."
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
-              className="border-black/20 focus:border-[#00ec97] font-medium"
+              className="border-black/20 focus:border-[#00ec97] font-medium text-xs h-8"
             />
+          </div>
 
+          {/* Controls Row - More compact */}
+          <div className="flex flex-wrap items-center gap-2">
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="border-black/20 font-medium">
+              <SelectTrigger className="border-black/20 font-medium text-xs h-8 w-32">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -231,12 +230,12 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
               </SelectContent>
             </Select>
 
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               <Button
                 variant={sortOrder === 'asc' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortOrder('asc')}
-                className={sortOrder === 'asc' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}
+                className={`text-xs h-8 px-2 ${sortOrder === 'asc' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}`}
               >
                 A-Z
               </Button>
@@ -244,18 +243,18 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                 variant={sortOrder === 'desc' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSortOrder('desc')}
-                className={sortOrder === 'desc' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}
+                className={`text-xs h-8 px-2 ${sortOrder === 'desc' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}`}
               >
                 Z-A
               </Button>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className={viewMode === 'grid' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}
+                className={`text-xs h-8 px-2 ${viewMode === 'grid' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}`}
               >
                 Grid
               </Button>
@@ -263,27 +262,25 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className={viewMode === 'list' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}
+                className={`text-xs h-8 px-2 ${viewMode === 'list' ? 'bg-[#00ec97] hover:bg-[#00ec97]/90 text-black font-medium' : 'border-black/20 hover:border-[#00ec97] font-medium'}`}
               >
                 List
               </Button>
             </div>
-          </div>
 
-          {/* Clear Filters */}
-          {activeFiltersCount > 0 && (
-            <div className="flex items-center justify-between pt-2 border-t border-black/10">
+            {/* Clear Filters */}
+            {activeFiltersCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearAllFilters}
-                className="font-medium hover:bg-black/5"
+                className="font-medium hover:bg-black/5 text-xs h-8 px-2 ml-auto"
               >
-                <X className="mr-2 h-4 w-4" />
-                Clear All Filters
+                <X className="mr-1 h-3 w-3" />
+                Clear All
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
 
