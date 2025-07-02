@@ -14,6 +14,9 @@ import { CalendarView } from '@/components/CalendarView';
 import { DelaysView } from '@/components/DelaysView';
 import { useGitHubData } from '@/hooks/useGitHubData';
 import { Footer } from '@/components/Footer';
+import { ProjectStatusChart } from '@/components/ProjectStatusChart';
+import { MilestoneProgressChart } from '@/components/MilestoneProgressChart';
+import { AnalyticsOverview } from '@/components/AnalyticsOverview';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -207,28 +210,12 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white border-black/10 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-black">Project Status Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center text-black/60 font-medium">
-                    Analytics charts will be implemented here
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-white border-black/10 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-black">Milestone Completion Trends</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center text-black/60 font-medium">
-                    Trend analysis charts will be implemented here
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="space-y-6">
+              <AnalyticsOverview projects={recentProjects} />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ProjectStatusChart projects={recentProjects} />
+                <MilestoneProgressChart projects={recentProjects} />
+              </div>
             </div>
           </TabsContent>
         </Tabs>
