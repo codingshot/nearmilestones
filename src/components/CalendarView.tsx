@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -150,9 +149,18 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
     );
   };
 
-  // Get dates that have milestones
+  // Get dates that have milestones with counts
   const getDatesWithMilestones = () => {
-    return filteredMilestones.map(milestone => new Date(milestone.dueDate));
+    const dateMap = new Map();
+    filteredMilestones.forEach(milestone => {
+      const date = new Date(milestone.dueDate);
+      const dateStr = date.toDateString();
+      if (!dateMap.has(dateStr)) {
+        dateMap.set(dateStr, { date, count: 0 });
+      }
+      dateMap.get(dateStr).count++;
+    });
+    return dateMap;
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -163,7 +171,8 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
     }
   };
 
-  const milestoneDates = getDatesWithMilestones();
+  const milestoneDatesMap = getDatesWithMilestones();
+  const milestoneDates = Array.from(milestoneDatesMap.values()).map(item => item.date);
 
   // Group milestones by month for condensed view
   const groupMilestonesByMonth = () => {
@@ -357,54 +366,85 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Calendar */}
-        <Card className="lg:col-span-2 bg-white border-black/10 shadow-sm">
-          <CardHeader>
+        <Card className="bg-white border-black/10 shadow-sm">
+          <CardHeader className="pb-4">
             <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
               <CalendarIcon className="h-5 w-5" />
               <span>Milestone Calendar</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              className="rounded-md border border-black/10 p-3 pointer-events-auto"
-              modifiers={{
-                milestone: milestoneDates,
-                overdue: filteredMilestones
-                  .filter(m => isOverdue(m.dueDate) && m.status !== 'completed')
-                  .map(m => new Date(m.dueDate)),
-                completed: filteredMilestones
-                  .filter(m => m.status === 'completed')
-                  .map(m => new Date(m.dueDate))
-              }}
-              modifiersStyles={{
-                milestone: { 
-                  backgroundColor: 'rgba(0, 236, 151, 0.1)', 
-                  color: 'black',
-                  fontWeight: 'bold',
-                  border: '2px solid rgba(0, 236, 151, 0.3)',
-                  borderRadius: '6px'
-                },
-                overdue: {
-                  backgroundColor: 'rgba(255, 121, 102, 0.2)',
-                  color: 'black',
-                  fontWeight: 'bold',
-                  border: '2px solid rgba(255, 121, 102, 0.4)',
-                  borderRadius: '6px'
-                },
-                completed: {
-                  backgroundColor: 'rgba(0, 236, 151, 0.2)',
-                  color: 'black',
-                  fontWeight: 'bold',
-                  border: '2px solid rgba(0, 236, 151, 0.5)',
-                  borderRadius: '6px'
-                }
-              }}
-            />
+          <CardContent className="p-4">
+            <div className="relative">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                className="rounded-md border border-black/10 p-0 w-full"
+                modifiers={{
+                  milestone: milestoneDates,
+                  overdue: filteredMilestones
+                    .filter(m => isOverdue(m.dueDate) && m.status !== 'completed')
+                    .map(m => new Date(m.dueDate)),
+                  completed: filteredMilestones
+                    .filter(m => m.status === 'completed')
+                    .map(m => new Date(m.dueDate)),
+                  noMilestone: (date: Date) => !milestoneDatesMap.has(date.toDateString())
+                }}
+                modifiersStyles={{
+                  milestone: { 
+                    backgroundColor: 'rgba(0, 236, 151, 0.1)', 
+                    color: 'black',
+                    fontWeight: 'bold',
+                    border: '2px solid rgba(0, 236, 151, 0.3)',
+                    borderRadius: '6px',
+                    position: 'relative'
+                  },
+                  overdue: {
+                    backgroundColor: 'rgba(255, 121, 102, 0.2)',
+                    color: 'black',
+                    fontWeight: 'bold',
+                    border: '2px solid rgba(255, 121, 102, 0.4)',
+                    borderRadius: '6px'
+                  },
+                  completed: {
+                    backgroundColor: 'rgba(0, 236, 151, 0.2)',
+                    color: 'black',
+                    fontWeight: 'bold',
+                    border: '2px solid rgba(0, 236, 151, 0.5)',
+                    borderRadius: '6px'
+                  },
+                  noMilestone: {
+                    color: '#999',
+                    opacity: 0.4
+                  }
+                }}
+                components={{
+                  Day: ({ date, displayMonth, ...props }) => {
+                    const dayProps = props as any;
+                    const milestoneData = milestoneDatesMap.get(date.toDateString());
+                    const count = milestoneData?.count || 0;
+                    
+                    return (
+                      <div className="relative w-full h-full">
+                        <button
+                          {...dayProps}
+                          className={`${dayProps.className} w-9 h-9 relative`}
+                        >
+                          {date.getDate()}
+                          {count > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[#00ec97] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                              {count}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  }
+                }}
+              />
+            </div>
             
             {/* Milestone boxes for selected date */}
             {selectedDate && getMilestonesForDate(selectedDate).length > 0 && (
@@ -447,12 +487,12 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
 
         {/* Selected Date Info */}
         <Card className="bg-white border-black/10 shadow-sm">
-          <CardHeader>
+          <CardHeader className="pb-4">
             <CardTitle className="text-lg font-semibold text-black">
               {selectedDate ? formatDate(selectedDate.toISOString()) : 'Select a Date'}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
             {selectedMilestones.length > 0 ? (
               <div className="space-y-3">
                 <div className="text-sm font-semibold text-black mb-3">
