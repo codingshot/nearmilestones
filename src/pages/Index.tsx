@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -75,7 +76,7 @@ const Index = () => {
       <header className="bg-white border-b border-black/10 px-6 py-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-black mb-2">NEAR Ecosystem Tracker</h1>
+            <h1 className="text-3xl font-semibold text-black mb-2">NEAR Milestones</h1>
             <p className="text-black/70 font-medium">
               Milestone tracking and dependency management
               {loading && <span className="ml-2 text-[#17d9d4]">(Loading GitHub data...)</span>}
