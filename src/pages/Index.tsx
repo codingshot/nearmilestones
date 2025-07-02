@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +11,8 @@ import { MilestoneTimeline } from '@/components/MilestoneTimeline';
 import { DependencyGraph } from '@/components/DependencyGraph';
 import { ProjectExplorer } from '@/components/ProjectExplorer';
 import { GitHubIntegration } from '@/components/GitHubIntegration';
+import { CalendarView } from '@/components/CalendarView';
+import { DelaysView } from '@/components/DelaysView';
 import { useGitHubData } from '@/hooks/useGitHubData';
 
 const Index = () => {
@@ -93,9 +96,11 @@ const Index = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-5 lg:w-[600px] bg-white border border-black/10">
+          <TabsList className="grid w-full grid-cols-7 lg:w-[800px] bg-white border border-black/10">
             <TabsTrigger value="dashboard" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dashboard</TabsTrigger>
             <TabsTrigger value="projects" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Projects</TabsTrigger>
+            <TabsTrigger value="calendar" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Calendar</TabsTrigger>
+            <TabsTrigger value="delays" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Delays</TabsTrigger>
             <TabsTrigger value="dependencies" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dependencies</TabsTrigger>
             <TabsTrigger value="github" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">GitHub</TabsTrigger>
             <TabsTrigger value="analytics" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Analytics</TabsTrigger>
@@ -176,6 +181,14 @@ const Index = () => {
 
           <TabsContent value="projects">
             <ProjectExplorer projects={recentProjects} />
+          </TabsContent>
+
+          <TabsContent value="calendar">
+            <CalendarView projects={recentProjects} />
+          </TabsContent>
+
+          <TabsContent value="delays">
+            <DelaysView projects={recentProjects} />
           </TabsContent>
 
           <TabsContent value="dependencies">
