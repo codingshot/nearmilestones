@@ -1,4 +1,3 @@
-
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -177,11 +176,8 @@ const ProjectDetail = () => {
     }
   ];
 
-  // Find project by ID (from GitHub data or mock data)
   const project = projects.find(p => p.id === projectId) || mockProjects.find(p => p.id === projectId);
   const allProjects = projects.length > 0 ? projects : mockProjects;
-
-  // Get initial tab from URL params
   const initialTab = searchParams.get('tab') || 'overview';
 
   if (loading) {
@@ -241,52 +237,9 @@ const ProjectDetail = () => {
                 Back to Dashboard
               </Button>
             </Link>
-            <div className="flex flex-wrap items-center gap-2">
-              {project.website && (
-                <Button variant="outline" size="sm" asChild className="font-medium border-black/20 hover:scale-105 transition-transform">
-                  <a href={project.website} target="_blank" rel="noopener noreferrer">
-                    <Globe className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Website</span>
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
-              )}
-              {project.docs && (
-                <Button variant="outline" size="sm" asChild className="font-medium border-black/20 hover:scale-105 transition-transform">
-                  <a href={project.docs} target="_blank" rel="noopener noreferrer">
-                    <FileText className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Docs</span>
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
-              )}
-              {project.githubRepo && (
-                <Button variant="outline" size="sm" asChild className="font-medium border-black/20 hover:scale-105 transition-transform">
-                  <a href={project.githubRepo} target="_blank" rel="noopener noreferrer">
-                    <Github className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">GitHub</span>
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
-              )}
-              {project.twitter && (
-                <Button variant="outline" size="sm" asChild className="font-medium border-black/20 hover:scale-105 transition-transform">
-                  <a href={project.twitter} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Twitter</span>
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
-              )}
-              {project.discord && (
-                <Button variant="outline" size="sm" asChild className="font-medium border-black/20 hover:scale-105 transition-transform">
-                  <a href={project.discord} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">Discord</span>
-                    <ExternalLink className="ml-2 h-3 w-3" />
-                  </a>
-                </Button>
-              )}
+            <div className="text-center lg:text-right bg-[#00ec97]/5 p-4 rounded-lg border border-[#00ec97]/20">
+              <div className="text-2xl md:text-3xl font-semibold text-[#00ec97] mb-1">{project.progress}%</div>
+              <div className="text-sm text-black/60 font-medium">Complete</div>
             </div>
           </div>
           
@@ -306,12 +259,71 @@ const ProjectDetail = () => {
                   </Badge>
                 )}
               </div>
-              <p className="text-black/70 font-medium max-w-3xl leading-relaxed">{project.description}</p>
-            </div>
-            
-            <div className="text-center lg:text-right bg-[#00ec97]/5 p-4 rounded-lg border border-[#00ec97]/20">
-              <div className="text-2xl md:text-3xl font-semibold text-[#00ec97] mb-1">{project.progress}%</div>
-              <div className="text-sm text-black/60 font-medium">Complete</div>
+              <p className="text-black/70 font-medium max-w-3xl leading-relaxed mb-4">{project.description}</p>
+              
+              {/* Social Links - Now underneath description */}
+              <div className="flex flex-wrap items-center gap-3">
+                {project.website && (
+                  <a 
+                    href={project.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-sm text-black/70 hover:text-black transition-colors hover:scale-105"
+                  >
+                    <Globe className="h-4 w-4" />
+                    <span>Website</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+                {project.docs && (
+                  <a 
+                    href={project.docs} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-sm text-black/70 hover:text-black transition-colors hover:scale-105"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>Docs</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+                {project.githubRepo && (
+                  <a 
+                    href={project.githubRepo} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-sm text-black/70 hover:text-black transition-colors hover:scale-105"
+                  >
+                    <Github className="h-4 w-4" />
+                    <span>GitHub</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+                {project.twitter && (
+                  <a 
+                    href={project.twitter} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-sm text-black/70 hover:text-black transition-colors hover:scale-105"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Twitter</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+                {project.discord && (
+                  <a 
+                    href={project.discord} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-2 text-sm text-black/70 hover:text-black transition-colors hover:scale-105"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Discord</span>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
