@@ -18,6 +18,8 @@ interface Project {
   dueDate: string;
   team: string[];
   dependencies: string[];
+  fundingType?: string;
+  description?: string;
 }
 
 interface ProjectExplorerProps {
@@ -31,6 +33,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
   const [progressFilter, setProgressFilter] = useState('all');
   const [teamFilter, setTeamFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [fundingFilter, setFundingFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -58,7 +61,12 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
       (dateFilter === 'thisMonth' && new Date(project.dueDate).getMonth() === new Date().getMonth()) ||
       (dateFilter === 'nextMonth' && new Date(project.dueDate).getMonth() === new Date().getMonth() + 1);
     
-    return matchesSearch && matchesStatus && matchesCategory && matchesProgress && matchesTeam && matchesDate;
+    const matchesFunding = fundingFilter === 'all' ||
+      (fundingFilter === 'grantees' && (project.fundingType === 'grant' || project.category === 'Grantee')) ||
+      (fundingFilter === 'infrastructure' && project.fundingType === 'infrastructure') ||
+      (fundingFilter === 'sdk' && project.fundingType === 'sdk');
+    
+    return matchesSearch && matchesStatus && matchesCategory && matchesProgress && matchesTeam && matchesDate && matchesFunding;
   });
 
   // Sort projects
@@ -96,6 +104,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
     setProgressFilter('all');
     setTeamFilter('');
     setDateFilter('all');
+    setFundingFilter('all');
   };
 
   const activeFiltersCount = [
@@ -104,7 +113,8 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
     categoryFilter !== 'all' && categoryFilter,
     progressFilter !== 'all' && progressFilter,
     teamFilter,
-    dateFilter !== 'all' && dateFilter
+    dateFilter !== 'all' && dateFilter,
+    fundingFilter !== 'all' && fundingFilter
   ].filter(Boolean).length;
 
   return (
@@ -136,7 +146,7 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
           </div>
           
           {/* Filters Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="border-black/20 font-medium">
                 <SelectValue placeholder="Status" />
@@ -160,6 +170,18 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
                     {category}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={fundingFilter} onValueChange={setFundingFilter}>
+              <SelectTrigger className="border-black/20 font-medium">
+                <SelectValue placeholder="Funding Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Funding</SelectItem>
+                <SelectItem value="grantees">Grantees</SelectItem>
+                <SelectItem value="infrastructure">Infrastructure</SelectItem>
+                <SelectItem value="sdk">SDK</SelectItem>
               </SelectContent>
             </Select>
 

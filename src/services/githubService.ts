@@ -161,6 +161,34 @@ export class GitHubService {
           description: "Next-generation NEAR wallet",
           fundingType: "grant",
           lastUpdated: "2024-06-30T09:15:00Z"
+        },
+        {
+          id: "defi-protocol",
+          name: "NEAR DeFi Protocol",
+          category: "Grantee",
+          status: "on-track",
+          progress: 78,
+          nextMilestone: "Token Launch",
+          dueDate: "2024-08-25",
+          team: ["Grace Wilson", "Henry Zhang"],
+          dependencies: ["NEAR Protocol Core"],
+          description: "Decentralized finance protocol on NEAR",
+          fundingType: "grant",
+          lastUpdated: "2024-07-01T12:00:00Z"
+        },
+        {
+          id: "nft-marketplace",
+          name: "NEAR NFT Marketplace",
+          category: "Grantee",
+          status: "at-risk",
+          progress: 55,
+          nextMilestone: "Beta Testing",
+          dueDate: "2024-07-30",
+          team: ["Ivy Chen", "Jack Martinez"],
+          dependencies: ["NEAR Protocol Core", "Meteor Wallet"],
+          description: "Community-driven NFT marketplace",
+          fundingType: "grant",
+          lastUpdated: "2024-06-29T14:30:00Z"
         }
       ],
       lastUpdate: "2024-07-02T10:00:00Z",
