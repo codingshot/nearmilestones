@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,9 +43,10 @@ interface CalendarViewProps {
 export const CalendarView = ({ projects }: CalendarViewProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedMilestones, setSelectedMilestones] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'calendar' | 'condensed'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'condensed'>('condensed');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [timeRangeFilter, setTimeRangeFilter] = useState<string>('all');
+  const [projectFilter, setProjectFilter] = useState<string>('all');
 
   // Get all milestones from all projects
   const allMilestones = projects.flatMap(project => 
@@ -55,6 +57,9 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
       projectCategory: project.category
     }))
   );
+
+  // Get unique project names for filter
+  const availableProjects = [...new Set(projects.map(project => project.name))];
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -85,9 +90,14 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
     return new Date(dateString) < new Date();
   };
 
-  // Filter milestones based on status
+  // Filter milestones based on status, time range, and project
   const getFilteredMilestones = () => {
     let filtered = allMilestones;
+
+    // Apply project filter
+    if (projectFilter !== 'all') {
+      filtered = filtered.filter(m => m.projectName === projectFilter);
+    }
 
     // Apply status filter
     if (statusFilter !== 'all') {
@@ -202,6 +212,17 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
                 <span className="text-sm font-medium text-black">Filters:</span>
               </div>
               <div className="flex flex-col md:flex-row gap-3 flex-1">
+                <Select value={projectFilter} onValueChange={setProjectFilter}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Filter by project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Projects</SelectItem>
+                    {availableProjects.map((project) => (
+                      <SelectItem key={project} value={project}>{project}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full md:w-[180px]">
                     <SelectValue placeholder="Filter by status" />
@@ -323,6 +344,17 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
               <span className="text-sm font-medium text-black">Filters:</span>
             </div>
             <div className="flex flex-col md:flex-row gap-3 flex-1">
+              <Select value={projectFilter} onValueChange={setProjectFilter}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Filter by project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {availableProjects.map((project) => (
+                    <SelectItem key={project} value={project}>{project}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="Filter by status" />
