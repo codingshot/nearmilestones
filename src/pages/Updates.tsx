@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +6,6 @@ import { Separator } from '@/components/ui/separator';
 import { GitBranch, Clock, User, Hash, ExternalLink, RefreshCw } from 'lucide-react';
 import { ChangelogService, ChangelogEntry, Change } from '@/services/changelogService';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { Footer } from '@/components/Footer';
 
 const Updates = () => {
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
@@ -91,7 +89,7 @@ const Updates = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f1e9]">
+    <div className="bg-[#f2f1e9]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -263,9 +261,6 @@ const Updates = () => {
           </CardContent>
         </Card>
       </div>
-      
-      <Separator className="bg-black/10" />
-      <Footer />
     </div>
   );
 };
