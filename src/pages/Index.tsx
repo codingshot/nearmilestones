@@ -19,7 +19,7 @@ const Index = () => {
   // Use GitHub data if available, otherwise fallback to mock data
   const recentProjects = githubProjects.length > 0 ? githubProjects : [
     {
-      id: 1,
+      id: "omnibridge",
       name: "Omnibridge",
       category: "Infrastructure",
       status: "on-track" as const,
@@ -30,7 +30,7 @@ const Index = () => {
       dependencies: ["NEAR Protocol Core"]
     },
     {
-      id: 2,
+      id: "agent-hub-sdk",
       name: "Agent Hub SDK",
       category: "SDK",
       status: "at-risk" as const,
@@ -41,7 +41,7 @@ const Index = () => {
       dependencies: ["NEAR Intents", "Lucid Wallet"]
     },
     {
-      id: 3,
+      id: "meteor-wallet",
       name: "Meteor Wallet",
       category: "Grantee",
       status: "delayed" as const,
