@@ -366,170 +366,151 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Calendar */}
-        <Card className="bg-white border-black/10 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
-              <CalendarIcon className="h-5 w-5" />
-              <span>Milestone Calendar</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="relative">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                className="rounded-md border border-black/10 p-0 w-full"
-                modifiers={{
-                  milestone: milestoneDates,
-                  overdue: filteredMilestones
-                    .filter(m => isOverdue(m.dueDate) && m.status !== 'completed')
-                    .map(m => new Date(m.dueDate)),
-                  completed: filteredMilestones
-                    .filter(m => m.status === 'completed')
-                    .map(m => new Date(m.dueDate)),
-                  noMilestone: (date: Date) => !milestoneDatesMap.has(date.toDateString())
-                }}
-                modifiersStyles={{
-                  milestone: { 
-                    backgroundColor: 'rgba(0, 236, 151, 0.1)', 
-                    color: 'black',
-                    fontWeight: 'bold',
-                    border: '2px solid rgba(0, 236, 151, 0.3)',
-                    borderRadius: '6px',
-                    position: 'relative'
-                  },
-                  overdue: {
-                    backgroundColor: 'rgba(255, 121, 102, 0.2)',
-                    color: 'black',
-                    fontWeight: 'bold',
-                    border: '2px solid rgba(255, 121, 102, 0.4)',
-                    borderRadius: '6px'
-                  },
-                  completed: {
-                    backgroundColor: 'rgba(0, 236, 151, 0.2)',
-                    color: 'black',
-                    fontWeight: 'bold',
-                    border: '2px solid rgba(0, 236, 151, 0.5)',
-                    borderRadius: '6px'
-                  },
-                  noMilestone: {
-                    color: '#999',
-                    opacity: 0.4
-                  }
-                }}
-                components={{
-                  Day: ({ date, displayMonth, ...props }) => {
-                    const dayProps = props as any;
-                    const milestoneData = milestoneDatesMap.get(date.toDateString());
-                    const count = milestoneData?.count || 0;
-                    
-                    return (
-                      <div className="relative w-full h-full">
-                        <button
-                          {...dayProps}
-                          className={`${dayProps.className} w-9 h-9 relative`}
-                        >
-                          {date.getDate()}
-                          {count > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-[#00ec97] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                              {count}
-                            </span>
-                          )}
-                        </button>
-                      </div>
-                    );
-                  }
-                }}
-              />
-            </div>
-            
-            {/* Milestone boxes for selected date */}
-            {selectedDate && getMilestonesForDate(selectedDate).length > 0 && (
-              <div className="mt-4 space-y-2">
-                <h4 className="font-semibold text-black text-sm">
-                  Milestones on {formatDate(selectedDate.toISOString())}:
-                </h4>
-                {getMilestonesForDate(selectedDate).map((milestone) => (
-                  <div key={milestone.id} className="p-2 bg-[#00ec97]/10 rounded border-l-4 border-[#00ec97]">
-                    <div className="flex items-center justify-between">
-                      <Link to={`/project/${milestone.projectId}`} className="font-medium text-black hover:text-[#00ec97] transition-colors text-sm">
-                        {milestone.projectName}
-                      </Link>
-                      <Badge className={`text-xs ${getStatusColor(milestone.status)}`}>
-                        {milestone.status.replace('-', ' ')}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-black/70 mt-1">{milestone.title}</div>
-                  </div>
-                ))}
+      {/* Calendar and Selected Date Info - Single Row */}
+      <Card className="bg-white border-black/10 shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
+            <CalendarIcon className="h-5 w-5" />
+            <span>Milestone Calendar</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Calendar */}
+            <div>
+              <div className="relative">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  className="rounded-md border border-black/10 p-0 w-full"
+                  modifiers={{
+                    milestone: milestoneDates,
+                    overdue: filteredMilestones
+                      .filter(m => isOverdue(m.dueDate) && m.status !== 'completed')
+                      .map(m => new Date(m.dueDate)),
+                    completed: filteredMilestones
+                      .filter(m => m.status === 'completed')
+                      .map(m => new Date(m.dueDate)),
+                    noMilestone: (date: Date) => !milestoneDatesMap.has(date.toDateString())
+                  }}
+                  modifiersStyles={{
+                    milestone: { 
+                      backgroundColor: 'rgba(0, 236, 151, 0.1)', 
+                      color: 'black',
+                      fontWeight: 'bold',
+                      border: '2px solid rgba(0, 236, 151, 0.3)',
+                      borderRadius: '6px',
+                      position: 'relative'
+                    },
+                    overdue: {
+                      backgroundColor: 'rgba(255, 121, 102, 0.2)',
+                      color: 'black',
+                      fontWeight: 'bold',
+                      border: '2px solid rgba(255, 121, 102, 0.4)',
+                      borderRadius: '6px'
+                    },
+                    completed: {
+                      backgroundColor: 'rgba(0, 236, 151, 0.2)',
+                      color: 'black',
+                      fontWeight: 'bold',
+                      border: '2px solid rgba(0, 236, 151, 0.5)',
+                      borderRadius: '6px'
+                    },
+                    noMilestone: {
+                      color: '#999',
+                      opacity: 0.4
+                    }
+                  }}
+                  components={{
+                    Day: ({ date, displayMonth, ...props }) => {
+                      const dayProps = props as any;
+                      const milestoneData = milestoneDatesMap.get(date.toDateString());
+                      const count = milestoneData?.count || 0;
+                      
+                      return (
+                        <div className="relative w-full h-full">
+                          <button
+                            {...dayProps}
+                            className={`${dayProps.className} w-9 h-9 relative`}
+                          >
+                            {date.getDate()}
+                            {count > 0 && (
+                              <span className="absolute -top-1 -right-1 bg-[#00ec97] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                                {count}
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                      );
+                    }
+                  }}
+                />
               </div>
-            )}
-            
-            <div className="mt-4 flex items-center space-x-6 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-[#00ec97]/20 rounded border border-[#00ec97]/30"></div>
-                <span className="text-black/70 font-medium">Has Milestones</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-[#ff7966]/20 rounded border border-[#ff7966]/40"></div>
-                <span className="text-black/70 font-medium">Overdue</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-[#00ec97]/30 rounded border border-[#00ec97]/50"></div>
-                <span className="text-black/70 font-medium">Completed</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Selected Date Info */}
-        <Card className="bg-white border-black/10 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-black">
-              {selectedDate ? formatDate(selectedDate.toISOString()) : 'Select a Date'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {selectedMilestones.length > 0 ? (
-              <div className="space-y-3">
-                <div className="text-sm font-semibold text-black mb-3">
-                  {selectedMilestones.length} Milestone{selectedMilestones.length > 1 ? 's' : ''}
+              
+              <div className="mt-4 flex items-center space-x-6 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-[#00ec97]/20 rounded border border-[#00ec97]/30"></div>
+                  <span className="text-black/70 font-medium">Has Milestones</span>
                 </div>
-                {selectedMilestones.map((milestone) => (
-                  <div key={milestone.id} className="p-3 bg-black/5 rounded-lg">
-                    <div className="flex items-start justify-between mb-2">
-                      <Link to={`/project/${milestone.projectId}`} className="font-medium text-black hover:text-[#00ec97] transition-colors">
-                        {milestone.projectName}
-                      </Link>
-                      <Badge className={`text-xs font-medium ${getStatusColor(milestone.status)}`}>
-                        {milestone.status.replace('-', ' ')}
-                      </Badge>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-[#ff7966]/20 rounded border border-[#ff7966]/40"></div>
+                  <span className="text-black/70 font-medium">Overdue</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-[#00ec97]/30 rounded border border-[#00ec97]/50"></div>
+                  <span className="text-black/70 font-medium">Completed</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Date Info */}
+            <div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-black">
+                  {selectedDate ? formatDate(selectedDate.toISOString()) : 'Select a Date'}
+                </h3>
+              </div>
+              <div className="h-[300px] overflow-y-auto">
+                {selectedMilestones.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="text-sm font-semibold text-black mb-3">
+                      {selectedMilestones.length} Milestone{selectedMilestones.length > 1 ? 's' : ''}
                     </div>
-                    <div className="text-sm text-black/70 font-medium mb-2">{milestone.title}</div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-black/60 font-medium">{milestone.projectCategory}</span>
-                      {isOverdue(milestone.dueDate) && milestone.status !== 'completed' && (
-                        <Badge variant="destructive" className="text-xs">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                          Overdue
-                        </Badge>
-                      )}
-                    </div>
+                    {selectedMilestones.map((milestone) => (
+                      <div key={milestone.id} className="p-3 bg-black/5 rounded-lg">
+                        <div className="flex items-start justify-between mb-2">
+                          <Link to={`/project/${milestone.projectId}`} className="font-medium text-black hover:text-[#00ec97] transition-colors">
+                            {milestone.projectName}
+                          </Link>
+                          <Badge className={`text-xs font-medium ${getStatusColor(milestone.status)}`}>
+                            {milestone.status.replace('-', ' ')}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-black/70 font-medium mb-2">{milestone.title}</div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-black/60 font-medium">{milestone.projectCategory}</span>
+                          {isOverdue(milestone.dueDate) && milestone.status !== 'completed' && (
+                            <Badge variant="destructive" className="text-xs">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Overdue
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <div className="text-center py-6 text-black/60">
+                    <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium">No milestones on this date</p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-6 text-black/60">
-                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-medium">No milestones on this date</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Upcoming Milestones Timeline */}
       <Card className="bg-white border-black/10 shadow-sm">
