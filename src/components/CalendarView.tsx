@@ -2,23 +2,26 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, List } from 'lucide-react';
+import { Calendar, List, RefreshCw } from 'lucide-react';
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CalendarViewProps {
   projects: any[];
 }
 
 export const CalendarView = ({ projects }: CalendarViewProps) => {
-  const [viewMode, setViewMode] = useState<'calendar' | 'condensed'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'condensed'>('condensed'); // Changed default to list view
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedMilestones, setSelectedMilestones] = useState<any[]>([]);
   const [projectFilter, setProjectFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [timeRangeFilter, setTimeRangeFilter] = useState<string>('all');
   const [availableProjects, setAvailableProjects] = useState<string[]>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const projectNames = projects.map(project => project.name);
@@ -127,76 +130,106 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant={viewMode === 'calendar' ? 'default' : 'outline'}
-                onClick={() => setViewMode('calendar')}
-                className="font-medium"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Calendar View
-              </Button>
-              <Button
-                variant={viewMode === 'condensed' ? 'default' : 'outline'}
-                onClick={() => setViewMode('condensed')}
-                className="font-medium"
-              >
-                <List className="h-4 w-4 mr-2" />
-                List View
-              </Button>
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* View Mode Toggle - Mobile responsive */}
+              {isMobile ? (
+                <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'calendar' | 'condensed')} className="w-full">
+                  <ToggleGroupItem value="calendar" className="flex-1 data-[state=on]:bg-[#00ec97] data-[state=on]:text-black">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Calendar
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="condensed" className="flex-1 data-[state=on]:bg-[#00ec97] data-[state=on]:text-black">
+                    <List className="h-4 w-4 mr-2" />
+                    List
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    variant={viewMode === 'calendar' ? 'default' : 'outline'}
+                    onClick={() => setViewMode('calendar')}
+                    className="font-medium"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Calendar View
+                  </Button>
+                  <Button
+                    variant={viewMode === 'condensed' ? 'default' : 'outline'}
+                    onClick={() => setViewMode('condensed')}
+                    className="font-medium"
+                  >
+                    <List className="h-4 w-4 mr-2" />
+                    List View
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Filters - Mobile Responsive */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-black">Filters:</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-medium text-xs h-8 px-2"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {!isMobile && <span className="ml-2">Refresh</span>}
+                </Button>
+              </div>
+              
+              {/* Mobile: 2 columns, Desktop: 3 columns */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                <Select value={projectFilter} onValueChange={setProjectFilter}>
+                  <SelectTrigger className="text-xs h-9">
+                    <SelectValue placeholder="Project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Projects</SelectItem>
+                    {availableProjects.map((project) => (
+                      <SelectItem key={project} value={project}>{project}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="text-xs h-9">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="delayed">Delayed</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={timeRangeFilter} onValueChange={setTimeRangeFilter}>
+                  <SelectTrigger className="text-xs h-9 col-span-2 lg:col-span-1">
+                    <SelectValue placeholder="Time Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this-month">This Month</SelectItem>
+                    <SelectItem value="next-month">Next Month</SelectItem>
+                    <SelectItem value="this-quarter">This Quarter</SelectItem>
+                    <SelectItem value="overdue">Overdue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Results count */}
+              <div className="flex items-center text-sm text-black/60 font-medium">
+                <span>{getFilteredMilestones().length} milestones</span>
+              </div>
             </div>
           </div>
 
           {viewMode === 'calendar' ? (
             <div className="space-y-6">
-              {/* Filters - Mobile Responsive */}
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium text-black">Filters:</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <Select value={projectFilter} onValueChange={setProjectFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by project" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Projects</SelectItem>
-                      {availableProjects.map((project) => (
-                        <SelectItem key={project} value={project}>{project}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="delayed">Delayed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={timeRangeFilter} onValueChange={setTimeRangeFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Time</SelectItem>
-                      <SelectItem value="this-month">This Month</SelectItem>
-                      <SelectItem value="next-month">Next Month</SelectItem>
-                      <SelectItem value="this-quarter">This Quarter</SelectItem>
-                      <SelectItem value="overdue">Overdue</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex items-center text-sm text-black/60 font-medium">
-                    <span>{getFilteredMilestones().length} milestones</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Calendar Component */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
@@ -259,53 +292,6 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Filters - Mobile Responsive */}
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium text-black">Filters:</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <Select value={projectFilter} onValueChange={setProjectFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by project" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Projects</SelectItem>
-                      {availableProjects.map((project) => (
-                        <SelectItem key={project} value={project}>{project}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="delayed">Delayed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={timeRangeFilter} onValueChange={setTimeRangeFilter}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Time</SelectItem>
-                      <SelectItem value="this-month">This Month</SelectItem>
-                      <SelectItem value="next-month">Next Month</SelectItem>
-                      <SelectItem value="this-quarter">This Quarter</SelectItem>
-                      <SelectItem value="overdue">Overdue</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex items-center text-sm text-black/60 font-medium">
-                    <span>{getFilteredMilestones().length} milestones</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Condensed Timeline View */}
               <div className="space-y-4">
                 {getFilteredMilestones().length > 0 ? (
