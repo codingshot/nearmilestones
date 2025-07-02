@@ -1,11 +1,10 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Users, GitBranch, ExternalLink, Github, Globe, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, GitBranch, ExternalLink, Github, Globe, MessageCircle, FileText } from 'lucide-react';
 import { MilestoneTimeline } from '@/components/MilestoneTimeline';
 import { useGitHubData } from '@/hooks/useGitHubData';
 
@@ -83,6 +82,7 @@ const ProjectDetail = () => {
 
   // Find project by ID (from GitHub data or mock data)
   const project = projects.find(p => p.id === projectId) || mockProjects.find(p => p.id === projectId);
+  const allProjects = projects.length > 0 ? projects : mockProjects;
 
   if (!project) {
     return (
@@ -139,6 +139,16 @@ const ProjectDetail = () => {
                   <a href={project.website} target="_blank" rel="noopener noreferrer">
                     <Globe className="mr-2 h-4 w-4" />
                     Website
+                    <ExternalLink className="ml-2 h-3 w-3" />
+                  </a>
+                </Button>
+              )}
+              {project.docs && (
+                <Button variant="outline" size="sm" asChild className="font-medium border-black/20">
+                  <a href={project.docs} target="_blank" rel="noopener noreferrer">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Docs
+                    <ExternalLink className="ml-2 h-3 w-3" />
                   </a>
                 </Button>
               )}
@@ -147,6 +157,25 @@ const ProjectDetail = () => {
                   <a href={project.githubRepo} target="_blank" rel="noopener noreferrer">
                     <Github className="mr-2 h-4 w-4" />
                     GitHub
+                    <ExternalLink className="ml-2 h-3 w-3" />
+                  </a>
+                </Button>
+              )}
+              {project.twitter && (
+                <Button variant="outline" size="sm" asChild className="font-medium border-black/20">
+                  <a href={project.twitter} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Twitter
+                    <ExternalLink className="ml-2 h-3 w-3" />
+                  </a>
+                </Button>
+              )}
+              {project.discord && (
+                <Button variant="outline" size="sm" asChild className="font-medium border-black/20">
+                  <a href={project.discord} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Discord
+                    <ExternalLink className="ml-2 h-3 w-3" />
                   </a>
                 </Button>
               )}
@@ -298,10 +327,10 @@ const ProjectDetail = () => {
           <TabsContent value="milestones">
             <Card className="bg-white border-black/10 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-black">Project Timeline</CardTitle>
+                <CardTitle className="text-xl font-semibold text-black">Project Milestones</CardTitle>
               </CardHeader>
               <CardContent>
-                <MilestoneTimeline projects={[project]} />
+                <MilestoneTimeline projects={[project]} allProjects={allProjects} />
               </CardContent>
             </Card>
           </TabsContent>
