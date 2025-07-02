@@ -66,17 +66,17 @@ export const AnalyticsOverview = ({ projects }: AnalyticsOverviewProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
       {stats.map((stat, index) => (
         <Card key={index} className="bg-white border-black/10 shadow-sm">
-          <CardContent className="p-4 sm:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
+                <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
               <div className="text-right">
-                <div className="text-xl sm:text-2xl font-bold text-black">{stat.value}</div>
-                <div className="text-xs sm:text-sm text-black/60 font-medium">{stat.title}</div>
+                <div className="text-2xl font-bold text-black">{stat.value}</div>
+                <div className="text-sm text-black/60 font-medium">{stat.title}</div>
               </div>
             </div>
             {stat.progress !== null && (
