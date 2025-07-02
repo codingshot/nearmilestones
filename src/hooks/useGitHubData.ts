@@ -44,6 +44,14 @@ export const useGitHubData = () => {
     return githubService.generateIssueUrl(projectId, milestoneData);
   };
 
+  const getDataUrl = () => {
+    return githubService.getDataUrl();
+  };
+
+  const getRepoUrl = () => {
+    return githubService.getRepoUrl();
+  };
+
   return {
     projects,
     issues,
@@ -52,6 +60,8 @@ export const useGitHubData = () => {
     lastUpdate,
     refetch: fetchData,
     generatePRUrl,
-    generateIssueUrl
+    generateIssueUrl,
+    getDataUrl,
+    getRepoUrl
   };
 };

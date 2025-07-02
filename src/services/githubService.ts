@@ -1,4 +1,3 @@
-
 const GITHUB_REPO_OWNER = 'codingshot';
 const GITHUB_REPO_NAME = 'nearmilestones';
 const GITHUB_DATA_PATH = 'public/data/projects.json';
@@ -25,6 +24,20 @@ export class GitHubService {
     }
 
     try {
+      // Try to fetch from the raw GitHub content first
+      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/main/${GITHUB_DATA_PATH}`;
+      const rawResponse = await fetch(rawUrl);
+      
+      if (rawResponse.ok) {
+        const content = await rawResponse.json();
+        this.cache.set(cacheKey, {
+          data: content,
+          timestamp: Date.now()
+        });
+        return content;
+      }
+
+      // Fallback to GitHub API
       const response = await fetch(
         `${GITHUB_API_BASE}/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${GITHUB_DATA_PATH}`
       );
@@ -93,6 +106,14 @@ export class GitHubService {
     const body = `## Milestone Details\n\n**Project:** ${projectId}\n**Milestone:** ${milestoneData.title}\n**Due Date:** ${milestoneData.dueDate}\n**Status:** ${milestoneData.status}\n\n### Description\n${milestoneData.description || 'No description provided'}\n\n### Acceptance Criteria\n- [ ] Deliverable 1\n- [ ] Deliverable 2\n- [ ] Deliverable 3\n\n### Dependencies\n${milestoneData.dependencies?.map((dep: string) => `- ${dep}`).join('\n') || 'No dependencies'}\n\n---\n*This issue was created via the NEAR Ecosystem Tracker*`;
     
     return `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=milestone,${projectId}`;
+  }
+
+  getDataUrl(): string {
+    return `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/blob/main/${GITHUB_DATA_PATH}`;
+  }
+
+  getRepoUrl(): string {
+    return `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`;
   }
 
   private getMockData() {

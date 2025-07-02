@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,6 +13,7 @@ import { GitHubIntegration } from '@/components/GitHubIntegration';
 import { CalendarView } from '@/components/CalendarView';
 import { DelaysView } from '@/components/DelaysView';
 import { useGitHubData } from '@/hooks/useGitHubData';
+import { Footer } from '@/components/Footer';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -233,6 +233,9 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
