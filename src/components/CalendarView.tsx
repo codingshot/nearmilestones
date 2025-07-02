@@ -3,10 +3,23 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calendar as CalendarIcon, Clock, AlertTriangle, List, Grid3X3 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, AlertTriangle, List, Grid3X3, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+interface Milestone {
+  id: string;
+  title: string;
+  status: 'completed' | 'in-progress' | 'pending' | 'delayed';
+  dueDate: string;
+  progress: number;
+  description: string;
+  definitionOfDone: string;
+  isGrantMilestone: boolean;
+  dependencies: string[];
+}
 
 interface Project {
   id: number | string;
@@ -20,6 +33,7 @@ interface Project {
   dependencies: string[];
   fundingType?: string;
   description?: string;
+  milestones?: Milestone[];
 }
 
 interface CalendarViewProps {
@@ -28,8 +42,20 @@ interface CalendarViewProps {
 
 export const CalendarView = ({ projects }: CalendarViewProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [selectedMilestones, setSelectedMilestones] = useState<Project[]>([]);
+  const [selectedMilestones, setSelectedMilestones] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'calendar' | 'condensed'>('calendar');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [timeRangeFilter, setTimeRangeFilter] = useState<string>('all');
+
+  // Get all milestones from all projects
+  const allMilestones = projects.flatMap(project => 
+    (project.milestones || []).map(milestone => ({
+      ...milestone,
+      projectName: project.name,
+      projectId: project.id,
+      projectCategory: project.category
+    }))
+  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -42,11 +68,15 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'on-track':
+      case 'completed':
         return 'bg-[#00ec97]/10 text-black border-[#00ec97]/30';
       case 'at-risk':
+      case 'in-progress':
         return 'bg-[#ff7966]/10 text-black border-[#ff7966]/30';
       case 'delayed':
         return 'bg-[#ff7966]/20 text-black border-[#ff7966]/40';
+      case 'pending':
+        return 'bg-black/5 text-black border-black/20';
       default:
         return 'bg-black/5 text-black border-black/20';
     }
@@ -56,17 +86,73 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
     return new Date(dateString) < new Date();
   };
 
+  // Filter milestones based on status
+  const getFilteredMilestones = () => {
+    let filtered = allMilestones;
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'incomplete') {
+        filtered = filtered.filter(m => m.status === 'in-progress' || m.status === 'pending');
+      } else if (statusFilter === 'overdue') {
+        filtered = filtered.filter(m => isOverdue(m.dueDate) && m.status !== 'completed');
+      } else {
+        filtered = filtered.filter(m => m.status === statusFilter);
+      }
+    }
+
+    // Apply time range filter
+    if (timeRangeFilter !== 'all') {
+      const now = new Date();
+      const filterDate = new Date();
+
+      switch (timeRangeFilter) {
+        case 'this-week':
+          const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+          const endOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 6));
+          filtered = filtered.filter(m => {
+            const date = new Date(m.dueDate);
+            return date >= startOfWeek && date <= endOfWeek;
+          });
+          break;
+        case 'this-month':
+          filterDate.setMonth(now.getMonth(), 1);
+          const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          filtered = filtered.filter(m => {
+            const date = new Date(m.dueDate);
+            return date >= filterDate && date <= endOfMonth;
+          });
+          break;
+        case 'next-month':
+          filterDate.setMonth(now.getMonth() + 1, 1);
+          const endOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+          filtered = filtered.filter(m => {
+            const date = new Date(m.dueDate);
+            return date >= filterDate && date <= endOfNextMonth;
+          });
+          break;
+        case 'past-due':
+          filtered = filtered.filter(m => isOverdue(m.dueDate) && m.status !== 'completed');
+          break;
+      }
+    }
+
+    return filtered;
+  };
+
+  const filteredMilestones = getFilteredMilestones();
+
   // Get milestones for selected date
   const getMilestonesForDate = (date: Date) => {
     const dateStr = date.toDateString();
-    return projects.filter(project => 
-      new Date(project.dueDate).toDateString() === dateStr
+    return filteredMilestones.filter(milestone => 
+      new Date(milestone.dueDate).toDateString() === dateStr
     );
   };
 
   // Get dates that have milestones
   const getDatesWithMilestones = () => {
-    return projects.map(project => new Date(project.dueDate));
+    return filteredMilestones.map(milestone => new Date(milestone.dueDate));
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -79,51 +165,90 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
 
   const milestoneDates = getDatesWithMilestones();
 
-  // Group projects by month for condensed view
-  const groupProjectsByMonth = () => {
-    const groups: { [key: string]: Project[] } = {};
-    projects.forEach(project => {
-      const date = new Date(project.dueDate);
+  // Group milestones by month for condensed view
+  const groupMilestonesByMonth = () => {
+    const groups: { [key: string]: any[] } = {};
+    filteredMilestones.forEach(milestone => {
+      const date = new Date(milestone.dueDate);
       const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
       if (!groups[monthKey]) {
         groups[monthKey] = [];
       }
-      groups[monthKey].push(project);
+      groups[monthKey].push(milestone);
     });
     return groups;
   };
 
-  const monthlyGroups = groupProjectsByMonth();
+  const monthlyGroups = groupMilestonesByMonth();
 
   if (viewMode === 'condensed') {
     return (
       <div className="space-y-6">
+        {/* Filters */}
+        <Card className="bg-white border-black/10 shadow-sm">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-black/60" />
+                <span className="text-sm font-medium text-black">Filters:</span>
+              </div>
+              <div className="flex flex-col md:flex-row gap-3 flex-1">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="incomplete">Incomplete</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="delayed">Delayed</SelectItem>
+                    <SelectItem value="overdue">Overdue</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={timeRangeFilter} onValueChange={setTimeRangeFilter}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Filter by time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="this-week">This Week</SelectItem>
+                    <SelectItem value="this-month">This Month</SelectItem>
+                    <SelectItem value="next-month">Next Month</SelectItem>
+                    <SelectItem value="past-due">Past Due</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewMode('calendar')}
+                className="font-medium border-black/20 hover:border-[#00ec97]"
+              >
+                <Grid3X3 className="h-4 w-4 mr-2" />
+                Calendar View
+              </Button>
+            </div>
+            <div className="mt-3 text-sm text-black/60">
+              Showing {filteredMilestones.length} milestones
+            </div>
+          </CardContent>
+        </Card>
+
         {/* View Toggle */}
         <Card className="bg-white border-black/10 shadow-sm">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
-                <CalendarIcon className="h-5 w-5" />
-                <span>Milestone Calendar - Condensed View</span>
-              </CardTitle>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode('calendar')}
-                  className="font-medium border-black/20 hover:border-[#00ec97]"
-                >
-                  <Grid3X3 className="h-4 w-4 mr-2" />
-                  Calendar View
-                </Button>
-              </div>
-            </div>
+            <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
+              <CalendarIcon className="h-5 w-5" />
+              <span>Milestone Calendar - Condensed View</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {Object.entries(monthlyGroups)
                 .sort(([a], [b]) => a.localeCompare(b))
-                .map(([monthKey, monthProjects]) => {
+                .map(([monthKey, monthMilestones]) => {
                   const [year, month] = monthKey.split('-');
                   const monthName = new Date(parseInt(year), parseInt(month)).toLocaleDateString('en-US', {
                     month: 'long',
@@ -133,32 +258,32 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
                   return (
                     <div key={monthKey} className="space-y-3">
                       <h3 className="text-lg font-semibold text-black border-b border-black/10 pb-2">
-                        {monthName}
+                        {monthName} ({monthMilestones.length} milestones)
                       </h3>
                       <div className="grid gap-3">
-                        {monthProjects
+                        {monthMilestones
                           .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-                          .map((project) => (
-                            <div key={project.id} className="flex items-center justify-between p-3 bg-black/5 rounded-lg hover:bg-black/10 transition-colors">
+                          .map((milestone) => (
+                            <div key={milestone.id} className="flex items-center justify-between p-3 bg-black/5 rounded-lg hover:bg-black/10 transition-colors">
                               <div className="flex items-center space-x-4">
                                 <div className="text-sm text-black/60 font-medium min-w-[60px]">
-                                  {new Date(project.dueDate).getDate()}
+                                  {new Date(milestone.dueDate).getDate()}
                                 </div>
                                 <div>
-                                  <Link to={`/project/${project.id}`} className="font-semibold text-black hover:text-[#00ec97] transition-colors">
-                                    {project.name}
+                                  <Link to={`/project/${milestone.projectId}`} className="font-semibold text-black hover:text-[#00ec97] transition-colors">
+                                    {milestone.projectName}
                                   </Link>
-                                  <div className="text-sm text-black/70 font-medium">{project.nextMilestone}</div>
+                                  <div className="text-sm text-black/70 font-medium">{milestone.title}</div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-3">
                                 <Badge variant="outline" className="text-xs font-medium border-black/20 text-black">
-                                  {project.category}
+                                  {milestone.projectCategory}
                                 </Badge>
-                                <Badge className={`text-xs font-medium ${getStatusColor(project.status)}`}>
-                                  {project.status.replace('-', ' ')}
+                                <Badge className={`text-xs font-medium ${getStatusColor(milestone.status)}`}>
+                                  {milestone.status.replace('-', ' ')}
                                 </Badge>
-                                {isOverdue(project.dueDate) && (
+                                {isOverdue(milestone.dueDate) && milestone.status !== 'completed' && (
                                   <Badge variant="destructive" className="text-xs">
                                     <AlertTriangle className="w-3 h-3 mr-1" />
                                     Overdue
@@ -180,27 +305,66 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Filters */}
+      <Card className="bg-white border-black/10 shadow-sm">
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-black/60" />
+              <span className="text-sm font-medium text-black">Filters:</span>
+            </div>
+            <div className="flex flex-col md:flex-row gap-3 flex-1">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="incomplete">Incomplete</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="delayed">Delayed</SelectItem>
+                  <SelectItem value="overdue">Overdue</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={timeRangeFilter} onValueChange={setTimeRangeFilter}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectValue placeholder="Filter by time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="this-week">This Week</SelectItem>
+                  <SelectItem value="this-month">This Month</SelectItem>
+                  <SelectItem value="next-month">Next Month</SelectItem>
+                  <SelectItem value="past-due">Past Due</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewMode('condensed')}
+              className="font-medium border-black/20 hover:border-[#00ec97]"
+            >
+              <List className="h-4 w-4 mr-2" />
+              Condensed View
+            </Button>
+          </div>
+          <div className="mt-3 text-sm text-black/60">
+            Showing {filteredMilestones.length} milestones
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
         <Card className="lg:col-span-2 bg-white border-black/10 shadow-sm">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
-                <CalendarIcon className="h-5 w-5" />
-                <span>Milestone Calendar</span>
-              </CardTitle>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode('condensed')}
-                  className="font-medium border-black/20 hover:border-[#00ec97]"
-                >
-                  <List className="h-4 w-4 mr-2" />
-                  Condensed View
-                </Button>
-              </div>
-            </div>
+            <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-black">
+              <CalendarIcon className="h-5 w-5" />
+              <span>Milestone Calendar</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Calendar
@@ -210,9 +374,12 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
               className="rounded-md border border-black/10 p-3 pointer-events-auto"
               modifiers={{
                 milestone: milestoneDates,
-                overdue: projects
-                  .filter(p => isOverdue(p.dueDate))
-                  .map(p => new Date(p.dueDate))
+                overdue: filteredMilestones
+                  .filter(m => isOverdue(m.dueDate) && m.status !== 'completed')
+                  .map(m => new Date(m.dueDate)),
+                completed: filteredMilestones
+                  .filter(m => m.status === 'completed')
+                  .map(m => new Date(m.dueDate))
               }}
               modifiersStyles={{
                 milestone: { 
@@ -228,6 +395,13 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
                   fontWeight: 'bold',
                   border: '2px solid rgba(255, 121, 102, 0.4)',
                   borderRadius: '6px'
+                },
+                completed: {
+                  backgroundColor: 'rgba(0, 236, 151, 0.2)',
+                  color: 'black',
+                  fontWeight: 'bold',
+                  border: '2px solid rgba(0, 236, 151, 0.5)',
+                  borderRadius: '6px'
                 }
               }}
             />
@@ -238,17 +412,17 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
                 <h4 className="font-semibold text-black text-sm">
                   Milestones on {formatDate(selectedDate.toISOString())}:
                 </h4>
-                {getMilestonesForDate(selectedDate).map((project) => (
-                  <div key={project.id} className="p-2 bg-[#00ec97]/10 rounded border-l-4 border-[#00ec97]">
+                {getMilestonesForDate(selectedDate).map((milestone) => (
+                  <div key={milestone.id} className="p-2 bg-[#00ec97]/10 rounded border-l-4 border-[#00ec97]">
                     <div className="flex items-center justify-between">
-                      <Link to={`/project/${project.id}`} className="font-medium text-black hover:text-[#00ec97] transition-colors text-sm">
-                        {project.name}
+                      <Link to={`/project/${milestone.projectId}`} className="font-medium text-black hover:text-[#00ec97] transition-colors text-sm">
+                        {milestone.projectName}
                       </Link>
-                      <Badge className={`text-xs ${getStatusColor(project.status)}`}>
-                        {project.status.replace('-', ' ')}
+                      <Badge className={`text-xs ${getStatusColor(milestone.status)}`}>
+                        {milestone.status.replace('-', ' ')}
                       </Badge>
                     </div>
-                    <div className="text-xs text-black/70 mt-1">{project.nextMilestone}</div>
+                    <div className="text-xs text-black/70 mt-1">{milestone.title}</div>
                   </div>
                 ))}
               </div>
@@ -262,6 +436,10 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-[#ff7966]/20 rounded border border-[#ff7966]/40"></div>
                 <span className="text-black/70 font-medium">Overdue</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-[#00ec97]/30 rounded border border-[#00ec97]/50"></div>
+                <span className="text-black/70 font-medium">Completed</span>
               </div>
             </div>
           </CardContent>
@@ -280,20 +458,20 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
                 <div className="text-sm font-semibold text-black mb-3">
                   {selectedMilestones.length} Milestone{selectedMilestones.length > 1 ? 's' : ''}
                 </div>
-                {selectedMilestones.map((project) => (
-                  <div key={project.id} className="p-3 bg-black/5 rounded-lg">
+                {selectedMilestones.map((milestone) => (
+                  <div key={milestone.id} className="p-3 bg-black/5 rounded-lg">
                     <div className="flex items-start justify-between mb-2">
-                      <Link to={`/project/${project.id}`} className="font-medium text-black hover:text-[#00ec97] transition-colors">
-                        {project.name}
+                      <Link to={`/project/${milestone.projectId}`} className="font-medium text-black hover:text-[#00ec97] transition-colors">
+                        {milestone.projectName}
                       </Link>
-                      <Badge className={`text-xs font-medium ${getStatusColor(project.status)}`}>
-                        {project.status.replace('-', ' ')}
+                      <Badge className={`text-xs font-medium ${getStatusColor(milestone.status)}`}>
+                        {milestone.status.replace('-', ' ')}
                       </Badge>
                     </div>
-                    <div className="text-sm text-black/70 font-medium mb-2">{project.nextMilestone}</div>
+                    <div className="text-sm text-black/70 font-medium mb-2">{milestone.title}</div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-black/60 font-medium">{project.category}</span>
-                      {isOverdue(project.dueDate) && (
+                      <span className="text-xs text-black/60 font-medium">{milestone.projectCategory}</span>
+                      {isOverdue(milestone.dueDate) && milestone.status !== 'completed' && (
                         <Badge variant="destructive" className="text-xs">
                           <AlertTriangle className="w-3 h-3 mr-1" />
                           Overdue
@@ -316,34 +494,39 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
       {/* Upcoming Milestones Timeline */}
       <Card className="bg-white border-black/10 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-black">Upcoming Milestones</CardTitle>
+          <CardTitle className="text-lg font-semibold text-black">Filtered Milestones</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {projects
-              .filter(p => new Date(p.dueDate) >= new Date())
+            {filteredMilestones
               .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-              .slice(0, 5)
-              .map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-4 bg-black/5 rounded-lg">
+              .slice(0, 10)
+              .map((milestone) => (
+                <div key={milestone.id} className="flex items-center justify-between p-4 bg-black/5 rounded-lg">
                   <div className="flex items-center space-x-4">
                     <div className="text-sm text-black/60 font-medium min-w-[80px]">
-                      {formatDate(project.dueDate)}
+                      {formatDate(milestone.dueDate)}
                     </div>
                     <div>
-                      <Link to={`/project/${project.id}`} className="font-semibold text-black hover:text-[#00ec97] transition-colors">
-                        {project.name}
+                      <Link to={`/project/${milestone.projectId}`} className="font-semibold text-black hover:text-[#00ec97] transition-colors">
+                        {milestone.projectName}
                       </Link>
-                      <div className="text-sm text-black/70 font-medium">{project.nextMilestone}</div>
+                      <div className="text-sm text-black/70 font-medium">{milestone.title}</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <Badge variant="outline" className="text-xs font-medium border-black/20 text-black">
-                      {project.category}
+                      {milestone.projectCategory}
                     </Badge>
-                    <Badge className={`text-xs font-medium ${getStatusColor(project.status)}`}>
-                      {project.status.replace('-', ' ')}
+                    <Badge className={`text-xs font-medium ${getStatusColor(milestone.status)}`}>
+                      {milestone.status.replace('-', ' ')}
                     </Badge>
+                    {isOverdue(milestone.dueDate) && milestone.status !== 'completed' && (
+                      <Badge variant="destructive" className="text-xs">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Overdue
+                      </Badge>
+                    )}
                   </div>
                 </div>
               ))}
