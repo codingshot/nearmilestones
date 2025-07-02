@@ -16,8 +16,58 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { useEffect, useState } from 'react';
 
 const Landing = () => {
+  const [stats, setStats] = useState([
+    { value: "0", label: "Active Projects", icon: GitBranch },
+    { value: "0", label: "Milestones Tracked", icon: CheckCircle },
+    { value: "0%", label: "On-time Delivery", icon: Clock },
+    { value: "Real-time", label: "Updates", icon: TrendingUp }
+  ]);
+
+  // Fetch real project data
+  const { data: projectData } = useQuery({
+    queryKey: ['projects-landing'],
+    queryFn: async () => {
+      const response = await fetch('/data/projects.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch project data');
+      }
+      return response.json();
+    },
+  });
+
+  // Update stats with real data
+  useEffect(() => {
+    if (projectData?.projects) {
+      const projects = projectData.projects;
+      const totalProjects = projects.length;
+      const totalMilestones = projects.reduce((acc: number, project: any) => 
+        acc + (project.milestones?.length || 0), 0
+      );
+      const completedMilestones = projects.reduce((acc: number, project: any) => 
+        acc + (project.milestones?.filter((m: any) => m.status === 'completed').length || 0), 0
+      );
+      const onTimeRate = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
+
+      setStats([
+        { value: `${totalProjects}`, label: "Active Projects", icon: GitBranch },
+        { value: `${totalMilestones}`, label: "Milestones Tracked", icon: CheckCircle },
+        { value: `${onTimeRate}%`, label: "Completion Rate", icon: Clock },
+        { value: "Real-time", label: "Updates", icon: TrendingUp }
+      ]);
+    }
+  }, [projectData]);
+
   const features = [
     {
       icon: GitBranch,
@@ -49,13 +99,6 @@ const Landing = () => {
       title: "GitHub Integration",
       description: "Seamlessly connect with GitHub repositories to automatically sync project data and development progress."
     }
-  ];
-
-  const stats = [
-    { value: "50+", label: "Active Projects", icon: GitBranch },
-    { value: "200+", label: "Milestones Tracked", icon: CheckCircle },
-    { value: "85%", label: "On-time Delivery", icon: Clock },
-    { value: "Real-time", label: "Updates", icon: TrendingUp }
   ];
 
   return (
@@ -125,7 +168,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Carousel */}
       <section className="py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -134,20 +177,34 @@ const Landing = () => {
               Everything you need to manage and track NEAR ecosystem projects efficiently
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="bg-white border-black/10 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#00ec97]/10 to-[#17d9d4]/10 rounded-lg flex items-center justify-center mb-4">
-                    <feature.icon className="h-6 w-6 text-[#00ec97]" />
-                  </div>
-                  <CardTitle className="text-xl font-semibold text-black">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-black/70 font-medium leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="relative">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {features.map((feature, index) => (
+                  <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                    <Card className="bg-white border-black/10 shadow-sm hover:shadow-md transition-shadow h-full">
+                      <CardHeader>
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#00ec97]/10 to-[#17d9d4]/10 rounded-lg flex items-center justify-center mb-4">
+                          <feature.icon className="h-6 w-6 text-[#00ec97]" />
+                        </div>
+                        <CardTitle className="text-xl font-semibold text-black">{feature.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-black/70 font-medium leading-relaxed">{feature.description}</p>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </div>
         </div>
       </section>
@@ -194,10 +251,10 @@ const Landing = () => {
             <div className="bg-gradient-to-br from-[#00ec97]/5 to-[#17d9d4]/5 rounded-2xl p-8 border border-black/10">
               <div className="text-center">
                 <div className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00ec97] to-[#17d9d4] mb-4">
-                  85%
+                  {stats[2].value}
                 </div>
-                <div className="text-xl font-semibold text-black mb-2">Average Project Success Rate</div>
-                <div className="text-black/70 font-medium">Projects using NEAR Milestones deliver on time</div>
+                <div className="text-xl font-semibold text-black mb-2">Average Project Completion Rate</div>
+                <div className="text-black/70 font-medium">Projects using NEAR Milestones deliver successfully</div>
               </div>
             </div>
           </div>
