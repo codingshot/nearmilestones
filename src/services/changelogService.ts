@@ -1,3 +1,4 @@
+
 import { GitHubService } from './githubService';
 
 export interface ChangelogEntry {
@@ -45,19 +46,9 @@ export class ChangelogService {
     }
 
     try {
-      const [mainCommits, prodCommits, mainData, prodData] = await Promise.all([
-        this.fetchCommitsFromBranch('main'),
-        this.fetchCommitsFromBranch('prod'),
-        this.fetchDataFromBranch('main'),
-        this.fetchDataFromBranch('prod')
-      ]);
-
-      const changelog = await this.generateChangelogFromDifferences(
-        mainCommits,
-        prodCommits,
-        mainData,
-        prodData
-      );
+      // Get commits from prod branch that modified projects.json
+      const prodCommits = await this.fetchCommitsForFile('prod');
+      const changelog = await this.generateChangelogFromCommits(prodCommits);
       
       this.cache.set(cacheKey, {
         data: changelog,
@@ -71,10 +62,10 @@ export class ChangelogService {
     }
   }
 
-  private async fetchCommitsFromBranch(branch: string): Promise<any[]> {
+  private async fetchCommitsForFile(branch: string): Promise<any[]> {
     try {
       const response = await fetch(
-        `https://api.github.com/repos/codingshot/nearmilestones/commits?sha=${branch}&per_page=50&path=public/data`
+        `https://api.github.com/repos/codingshot/nearmilestones/commits?sha=${branch}&path=public/data/projects.json&per_page=20`
       );
       
       if (!response.ok) {
@@ -88,38 +79,12 @@ export class ChangelogService {
     }
   }
 
-  private async fetchDataFromBranch(branch: string): Promise<any> {
-    try {
-      const response = await fetch(
-        `https://raw.githubusercontent.com/codingshot/nearmilestones/${branch}/public/data/projects.json`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${branch} data: ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error(`Error fetching ${branch} data:`, error);
-      return { projects: [] };
-    }
-  }
-
-  private async generateChangelogFromDifferences(
-    mainCommits: any[],
-    prodCommits: any[],
-    mainData: any,
-    prodData: any
-  ): Promise<ChangelogEntry[]> {
+  private async generateChangelogFromCommits(commits: any[]): Promise<ChangelogEntry[]> {
     const changelog: ChangelogEntry[] = [];
     
-    // Find commits that are in main but not in prod (recent changes)
-    const prodCommitShas = new Set(prodCommits.map(c => c.sha));
-    const newCommits = mainCommits.filter(c => !prodCommitShas.has(c.sha));
-
-    // Process new commits
-    for (const commit of newCommits.slice(0, 10)) {
-      const changes = await this.analyzeDataChanges(commit, mainData, prodData);
+    for (let i = 0; i < commits.length && i < 10; i++) {
+      const commit = commits[i];
+      const changes = await this.analyzeCommitChanges(commit, commits[i + 1]);
       
       if (changes.length > 0) {
         changelog.push({
@@ -134,101 +99,188 @@ export class ChangelogService {
       }
     }
 
-    // Analyze data differences between main and prod
-    const dataChanges = this.analyzeDifferencesInData(mainData, prodData);
-    if (dataChanges.length > 0) {
-      changelog.push({
-        id: `data-diff-${Date.now()}`,
-        date: new Date().toISOString(),
-        version: '1.0.0',
-        changes: dataChanges,
-        commitHash: 'latest',
-        commitMessage: 'Data synchronization update',
-        author: 'NEAR Ecosystem Team'
-      });
-    }
-
-    return changelog.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return changelog;
   }
 
-  private async analyzeDataChanges(commit: any, mainData: any, prodData: any): Promise<Change[]> {
+  private async analyzeCommitChanges(currentCommit: any, previousCommit?: any): Promise<Change[]> {
     const changes: Change[] = [];
-    const message = commit.commit.message.toLowerCase();
+    
+    try {
+      // Get the current version of projects.json
+      const currentData = await this.fetchProjectsDataAtCommit(currentCommit.sha);
+      
+      // Get the previous version for comparison
+      let previousData = null;
+      if (previousCommit) {
+        previousData = await this.fetchProjectsDataAtCommit(previousCommit.sha);
+      }
 
-    // Analyze commit message for data-related patterns
-    if (message.includes('public/data') || message.includes('projects.json')) {
-      if (message.includes('milestone') && (message.includes('complete') || message.includes('update'))) {
+      // Analyze commit message for quick insights
+      const message = currentCommit.commit.message.toLowerCase();
+      
+      if (message.includes('milestone') && (message.includes('complet') || message.includes('finish'))) {
         changes.push({
           type: 'milestone_completed',
-          title: 'Milestone Status Updated',
-          description: commit.commit.message,
-          details: { commitHash: commit.sha.substring(0, 7) }
+          title: 'Milestone Completed',
+          description: currentCommit.commit.message,
+          details: { commitHash: currentCommit.sha.substring(0, 7) }
         });
       }
 
-      if (message.includes('project') && message.includes('add')) {
+      if (message.includes('project') && (message.includes('add') || message.includes('new'))) {
         changes.push({
           type: 'project_added',
-          title: 'New Project Added to Ecosystem',
-          description: commit.commit.message,
-          details: { commitHash: commit.sha.substring(0, 7) }
+          title: 'New Project Added',
+          description: currentCommit.commit.message,
+          details: { commitHash: currentCommit.sha.substring(0, 7) }
         });
       }
 
-      if (message.includes('update') || message.includes('modify')) {
+      if (message.includes('delay') || message.includes('postpone')) {
         changes.push({
-          type: 'updated',
-          title: 'Project Data Updated',
-          description: commit.commit.message,
-          details: { commitHash: commit.sha.substring(0, 7) }
+          type: 'milestone_delayed',
+          title: 'Milestone Delayed',
+          description: currentCommit.commit.message,
+          details: { commitHash: currentCommit.sha.substring(0, 7) }
         });
       }
+
+      // If we have both current and previous data, compare them
+      if (currentData && previousData) {
+        const dataChanges = this.compareProjectData(currentData, previousData, currentCommit);
+        changes.push(...dataChanges);
+      }
+
+      // If no specific changes detected but there's a commit, add a generic update
+      if (changes.length === 0) {
+        changes.push({
+          type: 'updated',
+          title: 'Data Updated',
+          description: currentCommit.commit.message || 'Project data has been updated',
+          details: { commitHash: currentCommit.sha.substring(0, 7) }
+        });
+      }
+
+    } catch (error) {
+      console.error('Error analyzing commit changes:', error);
+      // Fallback to commit message analysis
+      changes.push({
+        type: 'updated',
+        title: 'Project Update',
+        description: currentCommit.commit.message,
+        details: { commitHash: currentCommit.sha.substring(0, 7) }
+      });
     }
 
     return changes;
   }
 
-  private analyzeDifferencesInData(mainData: any, prodData: any): Change[] {
-    const changes: Change[] = [];
-    
-    // Compare project counts
-    const mainProjects = mainData.projects || [];
-    const prodProjects = prodData.projects || [];
-    
-    if (mainProjects.length > prodProjects.length) {
-      const newProjects = mainProjects.filter(
-        (mp: any) => !prodProjects.find((pp: any) => pp.id === mp.id)
+  private async fetchProjectsDataAtCommit(sha: string): Promise<any> {
+    try {
+      const response = await fetch(
+        `https://raw.githubusercontent.com/codingshot/nearmilestones/${sha}/public/data/projects.json`
       );
       
-      newProjects.forEach((project: any) => {
+      if (!response.ok) {
+        return null;
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching data at commit ${sha}:`, error);
+      return null;
+    }
+  }
+
+  private compareProjectData(currentData: any, previousData: any, commit: any): Change[] {
+    const changes: Change[] = [];
+    
+    const currentProjects = currentData.projects || [];
+    const previousProjects = previousData.projects || [];
+    
+    // Check for new projects
+    currentProjects.forEach((currentProject: any) => {
+      const existsInPrevious = previousProjects.find((p: any) => p.id === currentProject.id);
+      if (!existsInPrevious) {
         changes.push({
           type: 'project_added',
-          title: `${project.name} Added to Ecosystem`,
-          description: `New project "${project.name}" has been added to the NEAR ecosystem tracker`,
-          projectId: project.id
+          title: `${currentProject.name} Added`,
+          description: `New project "${currentProject.name}" has been added to the ecosystem`,
+          projectId: currentProject.id,
+          details: { commitHash: commit.sha.substring(0, 7) }
         });
-      });
-    }
+      }
+    });
 
-    // Compare milestone completions
-    mainProjects.forEach((mainProject: any) => {
-      const prodProject = prodProjects.find((pp: any) => pp.id === mainProject.id);
-      if (prodProject) {
-        const mainMilestones = mainProject.milestones || [];
-        const prodMilestones = prodProject.milestones || [];
+    // Check for milestone status changes
+    currentProjects.forEach((currentProject: any) => {
+      const previousProject = previousProjects.find((p: any) => p.id === currentProject.id);
+      if (previousProject) {
+        const currentMilestones = currentProject.milestones || [];
+        const previousMilestones = previousProject.milestones || [];
         
-        mainMilestones.forEach((mainMilestone: any) => {
-          const prodMilestone = prodMilestones.find((pm: any) => pm.id === mainMilestone.id);
-          if (prodMilestone && prodMilestone.status !== 'completed' && mainMilestone.status === 'completed') {
-            changes.push({
-              type: 'milestone_completed',
-              title: `${mainMilestone.title} Completed`,
-              description: `Milestone "${mainMilestone.title}" for ${mainProject.name} has been marked as completed`,
-              projectId: mainProject.id,
-              milestoneId: mainMilestone.id
-            });
+        currentMilestones.forEach((currentMilestone: any) => {
+          const previousMilestone = previousMilestones.find((m: any) => m.id === currentMilestone.id);
+          
+          if (previousMilestone) {
+            // Check for status changes
+            if (previousMilestone.status !== currentMilestone.status) {
+              if (currentMilestone.status === 'completed') {
+                changes.push({
+                  type: 'milestone_completed',
+                  title: `${currentMilestone.title} Completed`,
+                  description: `Milestone "${currentMilestone.title}" for ${currentProject.name} has been completed`,
+                  projectId: currentProject.id,
+                  milestoneId: currentMilestone.id,
+                  details: { commitHash: commit.sha.substring(0, 7) }
+                });
+              } else if (currentMilestone.status === 'delayed') {
+                changes.push({
+                  type: 'milestone_delayed',
+                  title: `${currentMilestone.title} Delayed`,
+                  description: `Milestone "${currentMilestone.title}" for ${currentProject.name} has been delayed`,
+                  projectId: currentProject.id,
+                  milestoneId: currentMilestone.id,
+                  details: { commitHash: commit.sha.substring(0, 7) }
+                });
+              }
+            }
+            
+            // Check for progress changes
+            if (previousMilestone.progress !== currentMilestone.progress) {
+              changes.push({
+                type: 'updated',
+                title: `${currentMilestone.title} Progress Updated`,
+                description: `Progress updated from ${previousMilestone.progress}% to ${currentMilestone.progress}%`,
+                projectId: currentProject.id,
+                milestoneId: currentMilestone.id,
+                details: { commitHash: commit.sha.substring(0, 7) }
+              });
+            }
           }
         });
+
+        // Check for project status changes
+        if (previousProject.status !== currentProject.status) {
+          changes.push({
+            type: 'updated',
+            title: `${currentProject.name} Status Changed`,
+            description: `Project status changed from ${previousProject.status} to ${currentProject.status}`,
+            projectId: currentProject.id,
+            details: { commitHash: commit.sha.substring(0, 7) }
+          });
+        }
+
+        // Check for progress changes
+        if (previousProject.progress !== currentProject.progress) {
+          changes.push({
+            type: 'updated',
+            title: `${currentProject.name} Progress Updated`,
+            description: `Overall progress updated from ${previousProject.progress}% to ${currentProject.progress}%`,
+            projectId: currentProject.id,
+            details: { commitHash: commit.sha.substring(0, 7) }
+          });
+        }
       }
     });
 
@@ -238,7 +290,13 @@ export class ChangelogService {
   private extractVersionFromCommit(commit: any): string {
     const message = commit.commit.message;
     const versionMatch = message.match(/v?(\d+\.\d+\.\d+)/);
-    return versionMatch ? versionMatch[1] : '1.0.0';
+    if (versionMatch) {
+      return versionMatch[1];
+    }
+    
+    // Generate version based on date
+    const date = new Date(commit.commit.committer.date);
+    return `${date.getFullYear()}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}`;
   }
 
   private getMockChangelog(): ChangelogEntry[] {
@@ -246,7 +304,7 @@ export class ChangelogService {
       {
         id: 'mock-1',
         date: new Date().toISOString(),
-        version: '1.0.0',
+        version: '2024.07.02',
         changes: [
           {
             type: 'milestone_completed',
