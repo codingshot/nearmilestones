@@ -1,6 +1,7 @@
 
 import { Github } from 'lucide-react';
 import { GitHubService } from '@/services/githubService';
+import { Link } from 'react-router-dom';
 
 export const Footer = () => {
   const githubService = GitHubService.getInstance();
@@ -24,17 +25,22 @@ export const Footer = () => {
               className="flex items-center space-x-2 text-black hover:text-[#00ec97] transition-colors font-medium"
             >
               <Github className="h-5 w-5" />
-              <span>View on GitHub</span>
+              <span>GitHub</span>
             </a>
             
-            <a
-              href={githubService.getDataUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/landing"
               className="flex items-center space-x-2 text-black hover:text-[#17d9d4] transition-colors font-medium"
             >
-              <span>Data Source</span>
-            </a>
+              <span>About</span>
+            </Link>
+            
+            <Link
+              to="/data"
+              className="flex items-center space-x-2 text-black hover:text-[#17d9d4] transition-colors font-medium"
+            >
+              <span>Data</span>
+            </Link>
           </div>
         </div>
         

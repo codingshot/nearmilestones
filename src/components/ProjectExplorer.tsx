@@ -319,13 +319,14 @@ export const ProjectExplorer = ({ projects }: ProjectExplorerProps) => {
             <div className="text-black/60">
               <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <h3 className="text-lg font-semibold mb-2 text-black">No projects found</h3>
-              <p className="font-medium">Try adjusting your search terms or filters</p>
+              <p className="font-medium mb-4">Try adjusting your search terms or filters</p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={clearAllFilters}
-                className="mt-4 font-medium border-black/20 hover:border-[#00ec97]"
+                className="font-medium border-black/20 hover:border-[#00ec97]"
               >
+                <X className="mr-2 h-4 w-4" />
                 Clear All Filters
               </Button>
             </div>
