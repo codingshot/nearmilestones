@@ -236,7 +236,7 @@ const ProjectDetail = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 space-y-3 md:space-y-0">
             <Link to="/">
-              <Button variant="ghost" className="font-medium hover:bg-black/5">
+              <Button variant="ghost" className="font-medium hover:bg-black/5 transition-colors">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Dashboard
               </Button>
@@ -300,7 +300,7 @@ const ProjectDetail = () => {
                 <Badge className={`font-medium ${getStatusColor(project.status)}`}>
                   {project.status.replace('-', ' ')}
                 </Badge>
-                {project.fundingType && (文档代码继续但由于长度限制被截断)
+                {project.fundingType && (
                   <Badge variant="outline" className="font-medium border-[#17d9d4]/30 text-black bg-[#17d9d4]/5">
                     {project.fundingType}
                   </Badge>
