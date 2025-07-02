@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,21 +9,15 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { MilestoneTimeline } from '@/components/MilestoneTimeline';
 import { DependencyGraph } from '@/components/DependencyGraph';
 import { ProjectExplorer } from '@/components/ProjectExplorer';
+import { GitHubIntegration } from '@/components/GitHubIntegration';
+import { useGitHubData } from '@/hooks/useGitHubData';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const { projects: githubProjects, loading, error } = useGitHubData();
 
-  // Mock data for demonstration
-  const ecosystemStats = {
-    totalProjects: 47,
-    onTrackProjects: 32,
-    atRiskProjects: 12,
-    delayedProjects: 3,
-    upcomingMilestones: 23,
-    completionRate: 68
-  };
-
-  const recentProjects = [
+  // Use GitHub data if available, otherwise fallback to mock data
+  const recentProjects = githubProjects.length > 0 ? githubProjects : [
     {
       id: 1,
       name: "Omnibridge",
@@ -60,6 +53,16 @@ const Index = () => {
     }
   ];
 
+  // Update ecosystem stats based on actual data
+  const ecosystemStats = {
+    totalProjects: recentProjects.length,
+    onTrackProjects: recentProjects.filter(p => p.status === 'on-track').length,
+    atRiskProjects: recentProjects.filter(p => p.status === 'at-risk').length,
+    delayedProjects: recentProjects.filter(p => p.status === 'delayed').length,
+    upcomingMilestones: recentProjects.filter(p => new Date(p.dueDate) > new Date()).length,
+    completionRate: Math.round(recentProjects.reduce((acc, p) => acc + p.progress, 0) / recentProjects.length)
+  };
+
   return (
     <div className="min-h-screen bg-[#f2f1e9]">
       {/* Header */}
@@ -67,7 +70,11 @@ const Index = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-semibold text-black mb-2">NEAR Ecosystem Tracker</h1>
-            <p className="text-black/70 font-medium">Milestone tracking and dependency management</p>
+            <p className="text-black/70 font-medium">
+              Milestone tracking and dependency management
+              {loading && <span className="ml-2 text-[#17d9d4]">(Loading GitHub data...)</span>}
+              {error && <span className="ml-2 text-[#ff7966]">(Using cached data)</span>}
+            </p>
           </div>
           <div className="flex items-center space-x-4">
             <Badge variant="outline" className="bg-[#00ec97]/10 text-black border-[#00ec97]/30 font-medium">
@@ -86,10 +93,11 @@ const Index = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[500px] bg-white border border-black/10">
+          <TabsList className="grid w-full grid-cols-5 lg:w-[600px] bg-white border border-black/10">
             <TabsTrigger value="dashboard" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dashboard</TabsTrigger>
             <TabsTrigger value="projects" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Projects</TabsTrigger>
             <TabsTrigger value="dependencies" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Dependencies</TabsTrigger>
+            <TabsTrigger value="github" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">GitHub</TabsTrigger>
             <TabsTrigger value="analytics" className="font-medium data-[state=active]:bg-[#00ec97] data-[state=active]:text-black">Analytics</TabsTrigger>
           </TabsList>
 
@@ -179,6 +187,10 @@ const Index = () => {
                 <DependencyGraph projects={recentProjects} />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="github">
+            <GitHubIntegration />
           </TabsContent>
 
           <TabsContent value="analytics">
