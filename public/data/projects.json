@@ -195,6 +195,7 @@
       "dependencies": [],
       "description": "Next-generation NEAR wallet",
       "githubRepo": "https://github.com/meteor/wallet",
+      "milestoneRepo": "https://github.com/meteor/wallet",
       "website": "https://meteor.near.org",
       "fundingType": "grant",
       "lastUpdated": "2024-06-30T09:15:00Z",

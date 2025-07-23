@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Calendar, Users, GitBranch } from 'lucide-react';
+import { Calendar, Users, GitBranch, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Project {
@@ -16,6 +16,8 @@ interface Project {
   dueDate: string;
   team: string[];
   dependencies: string[];
+  milestonesSource?: 'local' | 'external';
+  milestoneRepo?: string;
 }
 
 interface ProjectCardProps {
@@ -50,7 +52,15 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <h3 className="font-semibold text-lg text-black hover:text-[#00ec97] transition-colors">{project.name}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-lg text-black hover:text-[#00ec97] transition-colors">{project.name}</h3>
+                {project.milestonesSource === 'external' && (
+                  <Badge variant="outline" className="text-xs font-medium border-[#00ec97]/30 text-[#00ec97] bg-[#00ec97]/5 flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3" />
+                    External Roadmap
+                  </Badge>
+                )}
+              </div>
               <Badge variant="outline" className="text-xs font-medium border-black/20 text-black">
                 {project.category}
               </Badge>

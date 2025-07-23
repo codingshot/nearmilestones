@@ -1,3 +1,5 @@
+import { MilestoneParser } from './milestoneParser';
+
 const GITHUB_REPO_OWNER = 'codingshot';
 const GITHUB_REPO_NAME = 'nearmilestones';
 const GITHUB_DATA_PATH = 'public/data/projects.json';
@@ -30,6 +32,11 @@ export class GitHubService {
       
       if (rawResponse.ok) {
         const content = await rawResponse.json();
+        
+        // Override milestones from external repos if available
+        const projectsWithOverrides = await this.overrideMilestonesFromRepos(content.projects);
+        content.projects = projectsWithOverrides;
+        
         this.cache.set(cacheKey, {
           data: content,
           timestamp: Date.now()
@@ -48,6 +55,10 @@ export class GitHubService {
       
       const fileData = await response.json();
       const content = JSON.parse(atob(fileData.content));
+      
+      // Override milestones from external repos if available
+      const projectsWithOverrides = await this.overrideMilestonesFromRepos(content.projects);
+      content.projects = projectsWithOverrides;
       
       this.cache.set(cacheKey, {
         data: content,
@@ -131,6 +142,94 @@ Please review and merge if the milestone completion criteria have been met.`);
 
   getRepoUrl(): string {
     return `https://github.com/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`;
+  }
+
+  /**
+   * Override project milestones from their respective GitHub repositories
+   */
+  private async overrideMilestonesFromRepos(projects: any[]): Promise<any[]> {
+    const updatedProjects = await Promise.all(
+      projects.map(async (project) => {
+        // Check if project has a milestoneRepo field
+        if (project.milestoneRepo || project.githubRepo) {
+          const repoUrl = project.milestoneRepo || project.githubRepo;
+          const milestones = await this.fetchMilestonesFromRepo(repoUrl, project.id);
+          
+          if (milestones && milestones.length > 0) {
+            console.log(`Overriding milestones for project ${project.id} from ${repoUrl}`);
+            return {
+              ...project,
+              milestones,
+              milestonesSource: 'external'
+            };
+          }
+        }
+        
+        return project;
+      })
+    );
+
+    return updatedProjects;
+  }
+
+  /**
+   * Fetch milestones.md from a GitHub repository
+   */
+  private async fetchMilestonesFromRepo(repoUrl: string, projectId: string): Promise<any[] | null> {
+    try {
+      const repoInfo = MilestoneParser.parseGitHubUrl(repoUrl);
+      if (!repoInfo) {
+        console.warn(`Invalid GitHub URL for project ${projectId}: ${repoUrl}`);
+        return null;
+      }
+
+      const cacheKey = `milestones-${repoInfo.owner}-${repoInfo.repo}`;
+      const cached = this.cache.get(cacheKey);
+      
+      if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+        return cached.data;
+      }
+
+      // Try to fetch milestones.md from the repository
+      const rawUrl = `https://raw.githubusercontent.com/${repoInfo.owner}/${repoInfo.repo}/main/milestones.md`;
+      const response = await fetch(rawUrl);
+      
+      if (!response.ok) {
+        // Try alternative paths
+        const altPaths = ['MILESTONES.md', 'docs/milestones.md', 'ROADMAP.md', 'roadmap.md'];
+        for (const path of altPaths) {
+          const altUrl = `https://raw.githubusercontent.com/${repoInfo.owner}/${repoInfo.repo}/main/${path}`;
+          const altResponse = await fetch(altUrl);
+          if (altResponse.ok) {
+            const content = await altResponse.text();
+            const milestones = MilestoneParser.parseMilestonesMarkdown(content, projectId);
+            
+            this.cache.set(cacheKey, {
+              data: milestones,
+              timestamp: Date.now()
+            });
+            
+            return milestones;
+          }
+        }
+        
+        console.log(`No milestones.md found for project ${projectId} in ${repoUrl}`);
+        return null;
+      }
+
+      const content = await response.text();
+      const milestones = MilestoneParser.parseMilestonesMarkdown(content, projectId);
+      
+      this.cache.set(cacheKey, {
+        data: milestones,
+        timestamp: Date.now()
+      });
+      
+      return milestones;
+    } catch (error) {
+      console.error(`Error fetching milestones for project ${projectId} from ${repoUrl}:`, error);
+      return null;
+    }
   }
 
   private getMockData() {

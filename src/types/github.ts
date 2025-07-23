@@ -11,6 +11,7 @@ export interface GitHubProject {
   dependencies: string[];
   description?: string;
   githubRepo?: string;
+  milestoneRepo?: string; // Optional repository for milestone overrides
   website?: string;
   documentation?: string;
   socialLinks?: {
@@ -21,6 +22,7 @@ export interface GitHubProject {
   fundingType?: 'grant' | 'partnership' | 'infrastructure' | 'sdk';
   lastUpdated: string;
   updatedBy?: string;
+  milestonesSource?: 'local' | 'external'; // Indicates source of milestone data
 }
 
 export interface GitHubDataResponse {
