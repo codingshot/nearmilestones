@@ -146,6 +146,8 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                       );
                     }
                     
+                    // Check if it's a project name that exists in our project list
+                    // This handles cases like "NEAR Protocol Core" or other project names
                     return (
                       <Badge key={index} variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-black bg-[#9797ff]/5">
                         {dep}
