@@ -107,11 +107,51 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
               <div>
                 <span className="font-semibold text-black">Dependencies:</span>
                 <div className="mt-2 space-x-2">
-                  {project.dependencies.map((dep, index) => (
-                    <Badge key={index} variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-black bg-[#9797ff]/5">
-                      {dep}
-                    </Badge>
-                  ))}
+                  {project.dependencies.map((dep, index) => {
+                    const isUrl = dep.startsWith('http://') || dep.startsWith('https://');
+                    const isMilestone = dep.includes('-m') || dep.includes('milestone');
+                    
+                    if (isUrl) {
+                      return (
+                        <a 
+                          key={index} 
+                          href={dep} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-block"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Badge variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-[#9797ff] bg-[#9797ff]/5 hover:bg-[#9797ff]/10 transition-colors cursor-pointer flex items-center gap-1">
+                            {dep}
+                            <ExternalLink className="h-2.5 w-2.5" />
+                          </Badge>
+                        </a>
+                      );
+                    }
+                    
+                    if (isMilestone) {
+                      // Extract project ID from milestone dependency (e.g., "omnibridge-m3" -> "omnibridge")
+                      const projectId = dep.split('-m')[0];
+                      return (
+                        <Link 
+                          key={index} 
+                          to={`/project/${projectId}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-block"
+                        >
+                          <Badge variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-[#9797ff] bg-[#9797ff]/5 hover:bg-[#9797ff]/10 transition-colors cursor-pointer">
+                            {dep}
+                          </Badge>
+                        </Link>
+                      );
+                    }
+                    
+                    return (
+                      <Badge key={index} variant="outline" className="text-xs font-medium border-[#9797ff]/30 text-black bg-[#9797ff]/5">
+                        {dep}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
             </div>
