@@ -1,54 +1,91 @@
-# Welcome to your Lovable project
+# Project Portfolio & Milestone Tracker
 
-## Project info
+A modern, responsive project management dashboard built with React, TypeScript, and Tailwind CSS. Track project milestones, dependencies, and progress with beautiful visualizations and GitHub integration.
 
-**URL**: https://lovable.dev/projects/9d4dbbd7-b7c3-412f-a35d-1ce97322fb0c
+## 🚀 Features
 
-## How can I edit this code?
+### Project Management
+- **Project Portfolio View**: Browse and explore multiple projects with detailed cards
+- **Milestone Tracking**: Comprehensive milestone management with progress indicators
+- **Dependency Management**: Clickable dependencies linking to other milestones or external resources
+- **Progress Visualization**: Charts and timelines showing project completion status
 
-There are several ways of editing your application.
+### GitHub Integration
+- **External Milestone Sources**: Override project milestones from GitHub repository `milestones.md` files
+- **Real-time Sync**: Automatic synchronization with GitHub repositories
+- **Flexible Milestone Parsing**: Support for various milestone formats and structures
 
-**Use Lovable**
+### Views & Navigation
+- **Calendar View**: Timeline-based project visualization with list/calendar toggle
+- **Project Detail Pages**: In-depth project information with milestone breakdowns
+- **Mobile-Responsive Design**: Optimized layouts for all device sizes
+- **Dark/Light Mode**: Theme switching support
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9d4dbbd7-b7c3-412f-a35d-1ce97322fb0c) and start prompting.
+### Analytics & Insights
+- **Project Status Charts**: Visual representation of project health and progress
+- **Milestone Analytics**: Detailed insights into completion rates and timelines
+- **Dependency Graphs**: Visual mapping of project interdependencies
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📁 Project Structure
 
-**Use your preferred IDE**
+```
+src/
+├── components/           # Reusable UI components
+│   ├── ui/              # shadcn-ui components
+│   ├── AnalyticsOverview.tsx
+│   ├── CalendarView.tsx
+│   ├── DependencyGraph.tsx
+│   ├── MilestoneTimeline.tsx
+│   ├── ProjectCard.tsx
+│   └── ...
+├── pages/               # Route components
+│   ├── Index.tsx        # Main dashboard
+│   ├── ProjectDetail.tsx
+│   ├── ApiDocs.tsx
+│   └── ...
+├── services/            # API and data services
+│   ├── githubService.ts
+│   ├── milestoneParser.ts
+│   ├── apiService.ts
+│   └── ...
+├── hooks/               # Custom React hooks
+├── types/               # TypeScript type definitions
+└── lib/                # Utility functions
+public/
+├── data/               # Static data files
+│   └── projects.json   # Project configuration
+└── ...
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠 Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (recommended: install with [nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+- npm or yarn
 
-Follow these steps:
+### Local Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Using Lovable
+Visit the [Lovable Project](https://lovable.dev/projects/9d4dbbd7-b7c3-412f-a35d-1ce97322fb0c) for visual editing and AI-powered development.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### GitHub Integration
+- Changes made in Lovable automatically sync to GitHub
+- Local changes pushed to GitHub sync back to Lovable
+- Supports parallel development workflows
 
 ## What technologies are used for this project?
 
