@@ -64,6 +64,18 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
     return getFilteredMilestones().filter(milestone => milestone.dueDate.split('T')[0] === formattedDate);
   };
 
+  const getMilestonesForMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const startOfMonth = new Date(year, month, 1);
+    const endOfMonth = new Date(year, month + 1, 0);
+    
+    return getFilteredMilestones().filter(milestone => {
+      const milestoneDate = new Date(milestone.dueDate);
+      return milestoneDate >= startOfMonth && milestoneDate <= endOfMonth;
+    });
+  };
+
   const getFilteredMilestones = () => {
     let filtered = projects.flatMap(project => {
       return project.milestones.map(milestone => ({
@@ -230,6 +242,21 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
 
           {viewMode === 'calendar' ? (
             <div className="space-y-6">
+              {/* Monthly Summary */}
+              <div className="bg-[#f2f1e9] rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-black">
+                    {selectedDate ? 
+                      `${selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} - ${getMilestonesForMonth(selectedDate).length} milestones` :
+                      `${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} - ${getMilestonesForMonth(new Date()).length} milestones`
+                    }
+                  </h3>
+                  <Badge variant="outline" className="bg-[#00ec97]/10 text-black border-[#00ec97]/30 font-medium">
+                    {selectedDate ? getMilestonesForMonth(selectedDate).length : getMilestonesForMonth(new Date()).length} total
+                  </Badge>
+                </div>
+              </div>
+
               {/* Calendar Component */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
@@ -253,6 +280,21 @@ export const CalendarView = ({ projects }: CalendarViewProps) => {
                           backgroundColor: '#00ec97',
                           color: 'white',
                           fontWeight: 'bold'
+                        }
+                      }}
+                      components={{
+                        DayContent: ({ date }) => {
+                          const milestoneCount = getMilestonesForDate(date).length;
+                          return (
+                            <div className="relative w-full h-full flex items-center justify-center">
+                              <span>{date.getDate()}</span>
+                              {milestoneCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-[#ff7966] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                                  {milestoneCount}
+                                </span>
+                              )}
+                            </div>
+                          );
                         }
                       }}
                     />
